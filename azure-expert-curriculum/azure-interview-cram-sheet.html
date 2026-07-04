@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure — Interview Cram Sheet</title>
+<style>
+  :root{--ink:#11161d; --muted:#566; --line:#d8dee6; --accent:#0a5ca8; --sig:#1f7a4d;}
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink);
+       line-height:1.4; margin:0; background:#eef1f4;}
+  .sheet{max-width:1000px; margin:0 auto; background:#fff; padding:26px 30px;}
+  .toolbar{max-width:1000px; margin:14px auto 0; text-align:right;}
+  button{background:var(--accent); color:#fff; border:0; padding:8px 16px; border-radius:6px;
+         font-size:.85rem; font-weight:600; cursor:pointer;}
+  button:hover{background:#08487f;}
+  h1{font-size:1.4rem; margin:0 0 2px; color:var(--accent);}
+  .sub{color:var(--muted); font-size:.8rem; margin-bottom:14px;}
+  .grid{column-count:2; column-gap:24px;}
+  .blk{break-inside:avoid; margin:0 0 13px; border:1px solid var(--line); border-radius:7px;
+       padding:9px 12px;}
+  .blk h2{font-size:.82rem; text-transform:uppercase; letter-spacing:.04em; margin:0 0 6px;
+          color:var(--accent); border-bottom:1px solid var(--line); padding-bottom:3px;}
+  .blk ul{margin:0; padding-left:15px;} .blk li{margin:3px 0; font-size:.79rem;}
+  b.k{color:var(--sig);}
+  .sig{background:#eaf7f0; border-left:3px solid var(--sig); padding:7px 10px; border-radius:0 5px 5px 0;
+       margin:0 0 13px; font-size:.79rem; break-inside:avoid;}
+  .sig b{color:var(--sig);}
+  @media print{
+    body{background:#fff;} .toolbar{display:none;} .sheet{max-width:none; padding:0;}
+    .grid{column-count:2;} @page{margin:1cm;}
+  }
+</style>
+</head>
+<body>
+<div class="toolbar"><button onclick="window.print()">🖨 Print / Save as PDF</button></div>
+<div class="sheet">
+  <h1>Azure — Interview Cram Sheet</h1>
+  <div class="sub">Condensed recall of the expert-signal lines &amp; key trade-offs. Verified vs Microsoft Learn, Jul 2026 · part of the <a href="index.html">Azure Expert Curriculum</a>.</div>
+
+  <div class="sig"><b>The closing line:</b> “Given the problem and its constraints, I pick services, justify trade-offs across the 5 WAF pillars, and hand exact execution to automation/AI.” Expertise = judgement, not memorised commands.</div>
+
+  <div class="grid">
+
+    <div class="blk"><h2>The 4 mental models</h2><ul>
+      <li><b class="k">Shared responsibility</b> — Azure secures the platform; you secure what's in it.</li>
+      <li><b class="k">Service ladder</b> — IaaS→PaaS→FaaS→SaaS = less control, less ops.</li>
+      <li><b class="k">Control vs data plane</b> — ARM creates resources; data plane does the work.</li>
+      <li>Everything is a <b class="k">resource with an ID</b>, governed by RBAC/Policy/tags/locks.</li>
+    </ul></div>
+
+    <div class="blk"><h2>WAF — 5 pillars (narrate every design)</h2><ul>
+      <li><b class="k">Reliability · Security · Cost · Operational Excellence · Performance</b></li>
+      <li>CAF = the org journey: Strategy→Plan→Ready→Adopt→Govern→Manage.</li>
+      <li>WAF = one workload; CAF = whole org. Name the right altitude.</li>
+    </ul></div>
+
+    <div class="blk"><h2>3 words people confuse</h2><ul>
+      <li><b class="k">Elasticity</b> = auto scale to demand.</li>
+      <li><b class="k">Scalability</b> = the ceiling you can reach.</li>
+      <li><b class="k">Resilience</b> = surviving failure. Design each deliberately.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Hierarchy &amp; global</h2><ul>
+      <li>Mgmt Group → Subscription → Resource Group → Resource. RBAC/Policy <b class="k">inherit downward</b>.</li>
+      <li>Region = many datacenters; <b class="k">AZ</b> = isolated DC. Design across <b class="k">≥3 AZs</b>.</li>
+      <li>Pick region for: <b class="k">latency + data residency + service availability</b>.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Identity = the perimeter</h2><ul>
+      <li><b class="k">No secrets in code.</b> Managed Identity → RBAC role → token, never a password.</li>
+      <li>Secrets that must exist → <b class="k">Key Vault</b>.</li>
+      <li><b class="k">PIM</b> = JIT admin elevation; <b class="k">Conditional Access</b> = Zero-Trust enforcement.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Compute — pick the most managed</h2><ul>
+      <li>VM → VMSS → App Service → Functions → Container Apps → AKS → ACI → Batch.</li>
+      <li>Default to most managed; step down to VM only with a real constraint, and justify it.</li>
+      <li><b class="k">Serverless</b> (Functions, Container Apps) = scale to zero, pay per use.</li>
+      <li><b class="k">Know when NOT to use AKS</b> — it's an ops commitment.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Networking (the differentiator)</h2><ul>
+      <li>LB (L4) → App Gateway (L7+WAF) → Front Door (global+CDN+WAF) → Traffic Mgr (DNS).</li>
+      <li><b class="k">Private Endpoint</b> = make PaaS (SQL/Storage) non-public.</li>
+      <li><b class="k">Hub-spoke</b> = shared firewall/DNS/gateway in hub; workloads in spokes.</li>
+      <li>VPN (over internet) vs <b class="k">ExpressRoute</b> (private circuit).</li>
+    </ul></div>
+
+    <div class="blk"><h2>Storage</h2><ul>
+      <li>Account = Blob / File / Queue / Table.</li>
+      <li>Tiers: <b class="k">Hot/Cool/Cold/Archive</b> (+ Smart auto-tier). Match to data temperature.</li>
+      <li>Redundancy: <b class="k">LRS→ZRS→GRS/GZRS</b>. Match to RPO/compliance.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Databases</h2><ul>
+      <li><b class="k">SQL DB</b> (single managed) · <b class="k">Managed Instance</b> (lift &amp; shift) · SQL-on-VM (control).</li>
+      <li><b class="k">Cosmos DB</b> 5 levels: Strong→Bounded→Session→Consistent Prefix→Eventual (CAP/PACELC).</li>
+      <li><b class="k">OLTP ≠ OLAP</b> — don't run analytics on the transactional store.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Messaging — event vs message</h2><ul>
+      <li><b class="k">Event</b> = something happened (Event Grid / Event Hubs).</li>
+      <li><b class="k">Message</b> = please do something (Service Bus).</li>
+      <li>Event Hubs = high-volume streaming; APIM = API gateway; Logic Apps = low-code flows.</li>
+      <li>Messaging buys <b class="k">loose coupling + independent scaling</b>.</li>
+    </ul></div>
+
+    <div class="blk"><h2>AI / ML (current naming)</h2><ul>
+      <li><b class="k">Microsoft Foundry</b> (was Azure AI Studio/Foundry) — unified AI+agents PaaS.</li>
+      <li>Azure OpenAI = a Foundry resource; AI Services = <b class="k">Foundry Tools</b>.</li>
+      <li><b class="k">RAG</b> = Blob/Lake → embeddings in <b class="k">AI Search</b> → grounded LLM → APIM + identity + App Insights.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Security &amp; Zero Trust</h2><ul>
+      <li><b class="k">Verify explicitly · least privilege · assume breach.</b></li>
+      <li>Defender for Cloud = posture (Secure Score); Sentinel = SIEM/SOAR.</li>
+      <li><b class="k">Defense in depth</b>: identity→network→host→app→data.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Governance &amp; cost (FinOps)</h2><ul>
+      <li>Policy = enforce rules; <b class="k">Landing Zone</b> = governed foundation to deploy into.</li>
+      <li>Levers: PAYG · <b class="k">Reservations</b> · Savings Plans · Spot · <b class="k">Hybrid Benefit</b>.</li>
+      <li>“Right-size from telemetry, reserve the baseline, burst on consumption, tag everything.”</li>
+    </ul></div>
+
+    <div class="blk"><h2>IaC / DevOps</h2><ul>
+      <li><b class="k">Bicep</b> first (compiles to ARM); Terraform multi-cloud.</li>
+      <li><b class="k">Declarative</b> = desired state, idempotent, reviewable. Portal-clicking doesn't scale.</li>
+      <li>App Service <b class="k">slots</b> = blue-green / zero-downtime.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Observability</h2><ul>
+      <li><b class="k">Metrics (what) · Logs (why) · Traces (where).</b></li>
+      <li>App Insights (APM) + Log Analytics (<b class="k">KQL</b>) + Alerts/Action Groups.</li>
+      <li>“Can't promise an SLA you can't measure.”</li>
+    </ul></div>
+
+    <div class="blk"><h2>Reliability &amp; DR</h2><ul>
+      <li><b class="k">AZs</b> = DC fault; <b class="k">multi-region</b> = region fault.</li>
+      <li><b class="k">RTO/RPO</b> define DR — ask the business first.</li>
+      <li><b class="k">Composite SLA</b>: services in series multiply (two 99.9% ≈ 99.8%); redundancy raises it.</li>
+      <li>Every extra nine costs money — design to the stated SLA, no more.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Certs (proof of breadth)</h2><ul>
+      <li>AZ-900 → AZ-104 → <b class="k">AZ-305</b> (architect; needs AZ-104; gold standard).</li>
+      <li>AZ-204 (dev) · AZ-500 (sec) · AZ-700 (net) · DP-203 (data) · AI-102 (AI).</li>
+    </ul></div>
+
+    <div class="blk"><h2>One reference architecture</h2><ul>
+      <li>App Service (zone-redundant) → SQL via <b class="k">Private Endpoint</b> → Key Vault + <b class="k">Managed Identity</b> → Front Door + WAF → App Insights → <b class="k">Bicep + CI/CD</b> → Reserved + Hybrid Benefit.</li>
+      <li>Defend one design across all 5 pillars and you can defend any.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Always close the loop on 5</h2><ul>
+      <li><b class="k">Identity</b> (managed identity, least priv)</li>
+      <li><b class="k">Network</b> (private, segmented)</li>
+      <li><b class="k">Reliability</b> (zones, SLA, DR)</li>
+      <li><b class="k">Observability</b> (monitor + alerts)</li>
+      <li><b class="k">Cost</b> (right-size, reserve, tag)</li>
+    </ul></div>
+
+    <div class="blk"><h2>.NET-on-Azure signals</h2><ul>
+      <li><b class="k">DefaultAzureCredential</b>: az login locally, MI deployed — same code; pin <b class="k">ManagedIdentityClientId</b> in prod.</li>
+      <li>SQL passwordless: <b class="k">Authentication=Active Directory Default</b> + CREATE USER … FROM EXTERNAL PROVIDER.</li>
+      <li>Functions: <b class="k">isolated worker only</b> (in-process EOL 2026-11-10); <b class="k">Flex Consumption</b> = recommended serverless.</li>
+      <li><b class="k">Aspire</b> models the distributed app; <b class="k">azd up</b> deploys it to ACA/App Service.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Deployment &amp; delivery</h2><ul>
+      <li>Pipelines auth via <b class="k">OIDC federation</b> — zero stored deploy secrets.</li>
+      <li>Zero-downtime: slots (App Service) / <b class="k">revision weights</b> (ACA); feature flags decouple release from deploy.</li>
+      <li><b class="k">what-if</b> previews; <b class="k">deployment stacks</b> deny drift + clean teardown.</li>
+      <li>DB migrations: pipeline step, <b class="k">expand→contract</b>, never at multi-instance startup.</li>
+    </ul></div>
+
+    <div class="blk"><h2>Data-engineering marks</h2><ul>
+      <li>Cosmos: RU/s <b class="k">divide across physical partitions</b> — hot key throttles at "enough" RU/s; design the key (cardinality · spread · query-match).</li>
+      <li><b class="k">Change feed</b> → materialized views; TransactionalBatch = one logical partition only.</li>
+      <li><b class="k">Outbox</b> at every DB-write→publish seam; consumers idempotent; DLQ has a runbook.</li>
+      <li>Private endpoint issues are <b class="k">DNS issues</b>: privatelink zone + zone link, nslookup first.</li>
+    </ul></div>
+
+    <div class="blk"><h2>SLA math (do it live)</h2><ul>
+      <li>Series <b class="k">multiplies</b>: 99.99×99.95×99.99 ≈ <b class="k">99.93%</b> (~6 h/yr).</li>
+      <li>Redundancy compensates: two 99.9% paths ≈ 99.9999% for that hop.</li>
+      <li>SLO ≤ composite SLA of the chain — or shorten the chain (queues).</li>
+      <li>Every extra nine costs money: design to the stated RTO/RPO, no more.</li>
+    </ul></div>
+
+  </div>
+</div>
+</body>
+</html>

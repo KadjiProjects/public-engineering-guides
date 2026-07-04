@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Migration &amp; Deployment — Knowledge Map for a Senior .NET Developer</title>
+<style>
+  :root{
+    --ink:#1b2330; --muted:#5c6675; --line:#e3e7ec; --accent:#0a5ca8;
+    --accent-soft:#e9f1f9; --net:#5a2d82; --net-soft:#f1eaf6;
+    --tip-bg:#e9f7ef; --tip-line:#2e8b57; --warn-bg:#fff6e6; --warn-line:#d99b2b;
+    --code:#f4f6f8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); line-height:1.62; margin:0; background:#fbfcfd;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:40px 26px 100px;}
+  header{border-bottom:3px solid var(--accent); padding-bottom:18px; margin-bottom:10px;}
+  h1{font-size:1.75rem; margin:0 0 6px; line-height:1.2;}
+  .sub{color:var(--muted); font-size:.98rem;}
+  h2{
+    font-size:1.32rem; margin-top:46px; padding:8px 0 6px;
+    border-bottom:2px solid var(--accent-soft); color:var(--accent); scroll-margin-top:16px;
+  }
+  h2 .num{
+    display:inline-block; min-width:1.7em; color:#fff; background:var(--accent);
+    border-radius:6px; text-align:center; font-size:.85em; padding:0 6px; margin-right:10px;
+  }
+  h3{font-size:1.06rem; margin-top:26px; color:#16263a;}
+  p{margin:11px 0;}
+  ul,ol{margin:10px 0; padding-left:22px;} li{margin:6px 0;}
+  code{background:var(--code); padding:1px 6px; border-radius:4px; font-size:.9em;
+       font-family:"Cascadia Code",Consolas,monospace;}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:.92rem;}
+  th,td{border:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top;}
+  th{background:var(--accent-soft);}
+  tr:nth-child(even) td{background:#f7f9fb;}
+  .box{border-left:4px solid var(--accent); background:#fff; padding:12px 16px;
+       margin:16px 0; border-radius:0 7px 7px 0; box-shadow:0 1px 2px rgba(20,30,50,.04);}
+  .net{border-left-color:var(--net); background:var(--net-soft);}
+  .net b{color:var(--net);}
+  .tip{border-left-color:var(--tip-line); background:var(--tip-bg);}
+  .tip b{color:var(--tip-line);}
+  .warn{border-left-color:var(--warn-line); background:var(--warn-bg);}
+  .warn b{color:#b9791a;}
+  .lead{font-size:1.02rem; color:#2a3645;}
+  /* TOC */
+  nav.toc{background:#fff; border:1px solid var(--line); border-radius:10px;
+          padding:18px 22px; margin:24px 0 8px; columns:2; column-gap:34px;}
+  nav.toc a{display:block; color:var(--accent); text-decoration:none; padding:3px 0;
+            font-size:.93rem; break-inside:avoid;}
+  nav.toc a:hover{text-decoration:underline;}
+  @media(max-width:680px){nav.toc{columns:1;} .wrap{padding:28px 16px 80px;}}
+  .pill{display:inline-block; font-size:.72rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:.05em; padding:2px 8px; border-radius:20px; background:var(--accent-soft);
+        color:var(--accent); margin-left:6px; vertical-align:middle;}
+  footer{margin-top:54px; padding-top:16px; border-top:1px solid var(--line);
+          color:var(--muted); font-size:.85rem;}
+  .back{font-size:.78rem; color:var(--muted); text-decoration:none; float:right; margin-top:6px;}
+  .back:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Azure Migration &amp; Deployment — A Knowledge Map</h1>
+  <div class="sub">For a senior .NET developer assessing whether a legacy system can move to Azure, and how to deploy it. Each section: what it is, why it matters for a migration decision, and how to demonstrate the skill. Part of the <a href="index.html">Azure Expert Curriculum</a> — read this alongside <a href="modules/12-architecture.md">Module 12</a>, as the "apply everything to a legacy estate" scenario.</div>
+</header>
+
+<p class="lead">You already know how reliable software gets built. The job here is mapping that judgement onto a new vocabulary. This document is organised the way a real assessment flows: <b>understand the frameworks → inventory the old system → choose targets → design the platform (compute, data, network, identity) → govern, automate, observe, and cost it → execute the migration</b>.</p>
+
+<nav class="toc">
+  <a href="#frameworks">1 · The two frameworks (CAF &amp; WAF)</a>
+  <a href="#rs">2 · Migration strategies — the “6 R’s”</a>
+  <a href="#assess">3 · Assessing the legacy system</a>
+  <a href="#tools">4 · Discovery &amp; assessment tooling</a>
+  <a href="#fundamentals">5 · Azure fundamentals &amp; hierarchy</a>
+  <a href="#compute">6 · Compute / hosting options</a>
+  <a href="#data">7 · Data &amp; storage</a>
+  <a href="#network">8 · Networking</a>
+  <a href="#identity">9 · Identity &amp; security</a>
+  <a href="#governance">10 · Governance &amp; landing zones</a>
+  <a href="#iac">11 · IaC &amp; CI/CD</a>
+  <a href="#observability">12 · Observability</a>
+  <a href="#reliability">13 · Reliability &amp; DR</a>
+  <a href="#cost">14 · Cost management</a>
+  <a href="#execution">15 · Executing the migration</a>
+  <a href="#decision">16 · A decision cheat-sheet</a>
+</nav>
+
+<!-- 1 -->
+<h2 id="frameworks"><span class="num">1</span>The two frameworks you must name-drop correctly</h2>
+<p>Microsoft structures everything around two complementary frameworks. Knowing the difference is the single fastest way to sound credible.</p>
+<h3>Cloud Adoption Framework (CAF) — the <em>journey</em></h3>
+<p>The end-to-end methodology for an organisation moving to cloud. Phases: <b>Strategy → Plan → Ready (landing zone) → Adopt (migrate/innovate) → Govern → Manage</b>. CAF answers “how do we as a company do this safely and repeatably.”</p>
+<h3>Well-Architected Framework (WAF) — the <em>quality of one workload</em></h3>
+<p>Five pillars to judge any single solution. Memorise them:</p>
+<table>
+  <tr><th>Pillar</th><th>The question it asks</th></tr>
+  <tr><td><b>Reliability</b></td><td>Does it recover from failure and meet its SLA?</td></tr>
+  <tr><td><b>Security</b></td><td>Is data and access protected, least-privilege, encrypted?</td></tr>
+  <tr><td><b>Cost Optimization</b></td><td>Are we paying only for value delivered?</td></tr>
+  <tr><td><b>Operational Excellence</b></td><td>Can we deploy, monitor and operate it with automation?</td></tr>
+  <tr><td><b>Performance Efficiency</b></td><td>Does it scale to demand without waste?</td></tr>
+</table>
+<div class="box tip"><b>How to demonstrate it:</b> When proposing any target architecture, narrate the trade-off across these five pillars. “I’d put it on App Service for operational excellence and cost, accept a small reliability trade-off, and mitigate with zone-redundancy.” That sentence shape signals seniority.</div>
+
+<!-- 2 -->
+<h2 id="rs"><span class="num">2</span>Migration strategies — the “6 R’s”</h2>
+<p>Every legacy component is sorted into one of these. The whole assessment is essentially assigning an R to each workload.</p>
+<table>
+  <tr><th>Strategy</th><th>What it means</th><th>Effort / reward</th></tr>
+  <tr><td><b>Rehost</b> (“lift &amp; shift”)</td><td>Move the VM/app as-is to Azure VMs.</td><td>Lowest effort, least cloud benefit. Good first step.</td></tr>
+  <tr><td><b>Replatform</b> (“lift &amp; reshape”)</td><td>Minor changes — e.g. app onto App Service, DB onto Azure SQL Managed Instance.</td><td>Moderate effort, removes server management.</td></tr>
+  <tr><td><b>Refactor</b></td><td>Recode parts to fit PaaS (containerise, swap a library, add config).</td><td>More effort, better scaling/cost.</td></tr>
+  <tr><td><b>Rearchitect</b></td><td>Change the structure — monolith to services, add queues, go event-driven.</td><td>High effort, high long-term payoff.</td></tr>
+  <tr><td><b>Rebuild</b></td><td>Rewrite from scratch as cloud-native.</td><td>Highest effort; only when the old code is a liability.</td></tr>
+  <tr><td><b>Replace</b></td><td>Drop it for SaaS (e.g. swap a custom CRM for a product).</td><td>No code; a procurement decision.</td></tr>
+</table>
+<p>Two bonus R’s in the inventory phase: <b>Retain</b> (leave on-prem for now) and <b>Retire</b> (switch it off — you’ll be surprised how much you can).</p>
+<div class="box warn"><b>Senior judgement:</b> The trap is rewriting everything. The right answer for an <em>old</em> system is usually <b>rehost or replatform first to stop the bleeding, then refactor incrementally</b>. State that bias explicitly — it shows you optimise for risk and time-to-value, not novelty.</div>
+
+<!-- 3 -->
+<h2 id="assess"><span class="num">3</span>Assessing the legacy system — what to inventory</h2>
+<p>Before choosing a target you characterise the source. These are the dimensions that actually drive the decision:</p>
+<ul>
+  <li><b>Runtime &amp; framework version</b> — .NET Framework 4.x vs modern .NET (8/9/10)? Framework runs only on Windows; that constrains you to Windows App Service / Windows containers / VMs, or signals a refactor to cross-platform .NET. (For Functions targets: the isolated worker model is mandatory going forward — in-process support ends 2026-11-10.)</li>
+  <li><b>OS &amp; its support status</b> — Windows Server 2012/2016 out of support? That alone can justify the move (and Azure offers Extended Security Updates).</li>
+  <li><b>State &amp; session</b> — Does it hold in-memory session or write to local disk? Cloud instances are disposable; stateful assumptions break horizontal scaling. (See the .NET note below.)</li>
+  <li><b>Dependencies &amp; coupling</b> — COM components, Windows services, scheduled tasks, registry use, file-share paths, hard-coded server names, SMTP relays.</li>
+  <li><b>Integrations</b> — what calls it and what it calls (other systems, third-party APIs, on-prem databases). These dictate networking and cutover order.</li>
+  <li><b>Database</b> — engine, version, size, features used (CLR, SQL Agent jobs, linked servers, cross-db queries). This decides Azure SQL DB vs Managed Instance vs SQL-on-VM.</li>
+  <li><b>Authentication</b> — Windows/AD auth, custom membership, certificates. Maps to Entra ID / managed identity work.</li>
+  <li><b>Non-functional needs</b> — throughput, latency, RTO/RPO, compliance/data residency, peak patterns.</li>
+  <li><b>Licensing</b> — Windows/SQL licences you can carry with Azure Hybrid Benefit.</li>
+</ul>
+<div class="box net"><b>.NET analogy — the “12-factor” shift:</b> On-prem you treated a server as a pet — it had a name, local state, and lived for years. In Azure you treat compute as cattle: stateless, replaceable instances behind a load balancer. So <b>session state moves out</b> (to Redis / SQL / cookies), <b>config moves to App Settings &amp; Key Vault</b> (not <code>web.config</code> on disk), <b>logs go to a sink</b> (not local files), and <b>uploads go to Blob storage</b> (not the local file system). Spotting these “pet” assumptions in the old code <em>is</em> the assessment.</div>
+
+<!-- 4 -->
+<h2 id="tools"><span class="num">4</span>Discovery &amp; assessment tooling</h2>
+<p>You don’t do this by hand. Name these tools and what each produces:</p>
+<table>
+  <tr><th>Tool</th><th>What it does</th></tr>
+  <tr><td><b>Azure Migrate</b></td><td>The hub. Discovers on-prem servers (agentless appliance), maps dependencies, right-sizes Azure targets, and estimates cost. Your primary assessment artefact.</td></tr>
+  <tr><td><b>Data Migration Assistant (DMA)</b></td><td>Scans SQL Server for compatibility issues and feature blockers against Azure SQL targets.</td></tr>
+  <tr><td><b>Azure Database Migration Service (DMS)</b></td><td>Performs the actual data move, including near-zero-downtime online migrations.</td></tr>
+  <tr><td><b>App Service Migration Assistant</b></td><td>Checks an IIS/.NET site for App Service readiness and can move it.</td></tr>
+  <tr><td><b>.NET Upgrade Assistant / try-convert</b></td><td>Helps move .NET Framework projects toward modern .NET.</td></tr>
+  <tr><td><b>TCO / Pricing Calculator</b></td><td>Builds the business case — on-prem cost vs projected Azure cost.</td></tr>
+</table>
+<div class="box tip"><b>How to demonstrate it:</b> Say you’d start with an <b>Azure Migrate dependency map</b> before drawing any target architecture — because you migrate in dependency order and never strand a chatty integration across the internet. That’s the line that separates an assessor from a guesser.</div>
+
+<!-- 5 -->
+<h2 id="fundamentals"><span class="num">5</span>Azure fundamentals &amp; the resource hierarchy</h2>
+<p>The organising containers, top to bottom — this is the cloud equivalent of solution → project → class structure:</p>
+<ul>
+  <li><b>Tenant (Entra ID directory)</b> — your organisation’s identity boundary.</li>
+  <li><b>Management Group</b> — groups subscriptions to apply policy/RBAC at scale.</li>
+  <li><b>Subscription</b> — billing + isolation boundary; quotas live here.</li>
+  <li><b>Resource Group</b> — a lifecycle bucket for resources deployed/deleted together (think one app environment).</li>
+  <li><b>Resource</b> — the actual thing (a web app, a database, a storage account).</li>
+  <li><b>Region &amp; Availability Zone</b> — where it physically runs; a region has multiple zones (independent datacentres) for resilience.</li>
+</ul>
+<div class="box net"><b>.NET analogy:</b> Resource Group ≈ a <code>.sln</code> grouping related projects you build and ship together; Region ≈ which datacentre your <code>bin</code> actually runs in; Tags ≈ assembly attributes/metadata you query later (for cost and ownership).</div>
+
+<!-- 6 -->
+<h2 id="compute"><span class="num">6</span>Compute / hosting options <span class="pill">core decision</span></h2>
+<p>The heart of the migration choice. Ordered from “most control / most work” to “most managed”:</p>
+<table>
+  <tr><th>Service</th><th>Use it when…</th><th>.NET fit</th></tr>
+  <tr><td><b>Virtual Machines (IaaS)</b></td><td>Pure lift &amp; shift; you need OS control or have un-containerisable dependencies.</td><td>Any app, incl. .NET Framework. You still patch the OS.</td></tr>
+  <tr><td><b>App Service (PaaS)</b></td><td>A web app or API you want hosted with zero server management, easy scaling, slots, custom domains/SSL.</td><td>The natural home for an ASP.NET / ASP.NET Core site. Supports Windows for Framework apps.</td></tr>
+  <tr><td><b>Azure Functions</b></td><td>Event-driven / scheduled / bursty work; pay-per-execution (serverless).</td><td>Replaces Windows services, cron jobs, queue workers.</td></tr>
+  <tr><td><b>Container Apps</b></td><td>Microservices/containers with built-in scaling (incl. scale-to-zero) without running Kubernetes yourself.</td><td>Great middle ground for containerised .NET services.</td></tr>
+  <tr><td><b>AKS (Kubernetes)</b></td><td>Many services, complex orchestration, and a team that can run K8s.</td><td>Powerful but operationally heavy — don’t pick it to host one app.</td></tr>
+  <tr><td><b>Service Fabric</b></td><td>Legacy stateful microservice platform (older Microsoft estates).</td><td>Mostly maintenance scenarios now.</td></tr>
+</table>
+<div class="box warn"><b>Decision discipline:</b> Default to the <em>most managed</em> option the workload allows. Move down to VMs only when a real constraint forces it. Justify each step down — that restraint is what reviewers look for.</div>
+<div class="box net"><b>.NET analogy:</b> App Service is to a VM what a hosted/managed runtime is to “I install IIS, configure the app pool, and patch Windows myself.” Functions is the cloud version of a <code>BackgroundService</code>/Windows Service that only wakes when there’s work — and you’re billed only while it runs.</div>
+
+<!-- 7 -->
+<h2 id="data"><span class="num">7</span>Data &amp; storage</h2>
+<h3>Relational (your SQL Server almost certainly lands here)</h3>
+<table>
+  <tr><th>Target</th><th>Pick when…</th></tr>
+  <tr><td><b>Azure SQL Database</b></td><td>A single modern DB; you want fully managed, auto-patched, serverless/elastic options. No SQL Agent, limited instance-level features.</td></tr>
+  <tr><td><b>Azure SQL Managed Instance</b></td><td>Lift &amp; shift of a real SQL Server — keeps SQL Agent, cross-DB queries, CLR, near-full surface. Best for legacy.</td></tr>
+  <tr><td><b>SQL Server on a VM</b></td><td>You need OS/instance-level control or an unsupported feature. Most work, most control.</td></tr>
+  <tr><td><b>Azure DB for PostgreSQL / MySQL</b></td><td>Open-source relational workloads.</td></tr>
+</table>
+<h3>Non-relational &amp; storage primitives</h3>
+<ul>
+  <li><b>Azure Storage Account</b> — four services in one: <b>Blob</b> (files/objects, the workhorse), <b>Queue</b> (simple messaging), <b>Table</b> (cheap key-value), <b>File</b> (SMB share — handy to replace an on-prem file share with minimal code change).</li>
+  <li><b>Azure Cosmos DB</b> — globally distributed, low-latency NoSQL; pick for planet-scale or flexible schema, not as a default.</li>
+  <li><b>Azure Cache for Redis</b> — externalises session/cache state so your compute can stay stateless.</li>
+</ul>
+<div class="box net"><b>.NET analogy:</b> Moving local-disk file writes to <b>Blob</b> is the same refactor as swapping <code>File.WriteAllBytes</code> for a storage SDK call. Replacing in-proc <code>IMemoryCache</code> shared across instances with <b>Redis</b> (<code>IDistributedCache</code>) is the canonical “make it scale horizontally” change.</div>
+
+<!-- 8 -->
+<h2 id="network"><span class="num">8</span>Networking</h2>
+<p>The part most app developers under-rate and most assessors get quizzed on.</p>
+<ul>
+  <li><b>Virtual Network (VNet) &amp; Subnets</b> — your private network in Azure; segment tiers (web/app/data) into subnets.</li>
+  <li><b>Network Security Group (NSG)</b> — stateful firewall rules on subnets/NICs (allow 443, deny the rest). Think IP-table/firewall as config.</li>
+  <li><b>Load Balancer (L4)</b> vs <b>Application Gateway (L7, with WAF)</b> vs <b>Front Door (global L7 + CDN + WAF)</b> — distribute traffic at increasing levels of smarts and reach.</li>
+  <li><b>Private Endpoint / Service Endpoint</b> — keep traffic to PaaS (SQL, Storage) on the Azure backbone instead of the public internet. Expect to be asked “how do you make the database <em>not</em> publicly reachable?” — the answer is a Private Endpoint.</li>
+  <li><b>Hybrid connectivity</b> — <b>VPN Gateway</b> (encrypted over internet) or <b>ExpressRoute</b> (private dedicated line) to reach on-prem during a phased migration.</li>
+  <li><b>Azure DNS / Private DNS Zones</b> — name resolution, including for private endpoints.</li>
+</ul>
+<div class="box warn"><b>Migration reality:</b> During a phased move, the app is in Azure but the database may still be on-prem (or vice-versa). The networking question — latency, bandwidth, and a secure hybrid link — is usually the hardest practical constraint. Raise it early.</div>
+
+<!-- 9 -->
+<h2 id="identity"><span class="num">9</span>Identity &amp; security</h2>
+<ul>
+  <li><b>Microsoft Entra ID</b> (formerly Azure AD) — the cloud identity provider; users, groups, app registrations, SSO, MFA, conditional access.</li>
+  <li><b>RBAC (Role-Based Access Control)</b> — who can do what on which resource (Owner/Contributor/Reader + granular roles), assigned at any level of the hierarchy.</li>
+  <li><b>Managed Identity</b> — an Entra identity for your app so it authenticates to SQL/Key Vault/Storage <b>with no secrets in code or config</b>. This is the modern best practice — emphasise it.</li>
+  <li><b>Azure Key Vault</b> — central store for secrets, keys, certificates; your app reads them at runtime via managed identity.</li>
+  <li><b>Microsoft Defender for Cloud</b> — posture management + threat protection, with a “secure score” to track hardening.</li>
+  <li><b>Encryption</b> — at rest (default on storage/SQL) and in transit (TLS); know that both are expected baselines.</li>
+</ul>
+<div class="box net"><b>.NET analogy:</b> The old <code>connectionString</code> with a SQL username/password in <code>web.config</code> is exactly what you eliminate. The pattern becomes: app has a <b>Managed Identity</b> → granted an RBAC role on the DB → connects with no password at all. Secrets that must exist live in <b>Key Vault</b>, referenced — never committed.</div>
+
+<!-- 10 -->
+<h2 id="governance"><span class="num">10</span>Governance &amp; landing zones</h2>
+<ul>
+  <li><b>Landing Zone</b> — a pre-built, governed Azure foundation (networking, identity, policy, management) you deploy <em>before</em> migrating workloads. The CAF “Ready” phase. Workloads land into it.</li>
+  <li><b>Azure Policy</b> — rules enforced automatically (“deny resources outside West Europe”, “require encryption”, “enforce tagging”). Compliance as code.</li>
+  <li><b>Tags</b> — key/value metadata on resources for cost allocation, ownership, environment. Trivial to skip, painful to retrofit.</li>
+  <li><b>Blueprints / template specs</b> — repeatable, governed environment definitions.</li>
+  <li><b>Cost &amp; quota boundaries</b> — subscriptions and management groups used deliberately to separate prod/non-prod and business units.</li>
+</ul>
+<div class="box tip"><b>How to demonstrate it:</b> Mention that you’d migrate <em>into</em> a landing zone rather than hand-crafting resources, so security and cost controls exist from day one. It signals you think at organisation scale, not just one app.</div>
+
+<!-- 11 -->
+<h2 id="iac"><span class="num">11</span>Infrastructure as Code &amp; CI/CD</h2>
+<ul>
+  <li><b>Bicep</b> — Azure-native, readable IaC language (the modern replacement for raw ARM JSON). <b>Learn this one first.</b></li>
+  <li><b>ARM templates</b> — the underlying JSON; you’ll read it, rarely write it by hand now.</li>
+  <li><b>Terraform</b> — multi-cloud IaC; common in larger orgs.</li>
+  <li><b>Azure DevOps</b> (Repos/Pipelines/Boards) &amp; <b>GitHub Actions</b> — build/test/deploy pipelines. Either can deploy Bicep and push app code.</li>
+  <li><b>Deployment patterns</b> — App Service <b>deployment slots</b> for blue-green/zero-downtime swaps; environments promoted dev → test → prod.</li>
+</ul>
+<div class="box net"><b>.NET analogy:</b> IaC is <code>dotnet build</code> for your infrastructure — declarative, version-controlled, repeatable, code-reviewed. “It works because someone clicked the portal” is the cloud equivalent of an undocumented manual build step; you replace it with a pipeline.</div>
+
+<!-- 12 -->
+<h2 id="observability"><span class="num">12</span>Observability</h2>
+<ul>
+  <li><b>Azure Monitor</b> — the umbrella for metrics, logs, and alerts.</li>
+  <li><b>Application Insights</b> — APM for your app: request rates, dependencies, exceptions, end-to-end traces, live metrics. Drop-in for .NET.</li>
+  <li><b>Log Analytics (KQL)</b> — the query workspace where logs land; <b>Kusto Query Language</b> is the SQL-like language you’ll use to investigate.</li>
+  <li><b>Alerts &amp; Action Groups</b> — fire on a metric/log condition → email/Teams/webhook/auto-heal.</li>
+  <li><b>Dashboards &amp; Workbooks</b> — shared operational views.</li>
+</ul>
+<div class="box tip"><b>How to demonstrate it:</b> Tie observability back to the WAF “Operational Excellence” pillar and to your SLA: “I can’t claim 99.9% if I can’t see failures — App Insights + alerts is part of the migration, not an afterthought.”</div>
+
+<!-- 13 -->
+<h2 id="reliability"><span class="num">13</span>Reliability &amp; disaster recovery</h2>
+<ul>
+  <li><b>SLA &amp; the “number of nines”</b> — know that higher availability needs redundancy you must design in (and pay for).</li>
+  <li><b>Availability Zones</b> — spread instances across physically separate datacentres in one region to survive a datacentre fault.</li>
+  <li><b>Region pairs &amp; multi-region</b> — for surviving a whole-region outage; usually active-passive for cost.</li>
+  <li><b>RTO / RPO</b> — Recovery Time / Recovery Point Objectives — the two numbers that define your DR design. Always ask the business for them.</li>
+  <li><b>Backup &amp; geo-replication</b> — Azure Backup, SQL automated backups + geo-restore, Storage redundancy tiers (LRS/ZRS/GRS), Azure Site Recovery for VM failover.</li>
+  <li><b>Scaling</b> — vertical (bigger SKU) vs horizontal (more instances); autoscale rules on metrics.</li>
+</ul>
+<div class="box warn"><b>Cost ↔ resilience trade-off:</b> Every nine costs money. The senior move is to ask for the <em>business’s</em> RTO/RPO and SLA target first, then design the minimum architecture that meets it — not to gold-plate by reflex.</div>
+
+<!-- 14 -->
+<h2 id="cost"><span class="num">14</span>Cost management</h2>
+<ul>
+  <li><b>Pricing models</b> — <b>Pay-as-you-go</b>, <b>Reserved Instances</b> (1/3-yr commit, big discount), <b>Savings Plans</b> (flexible commit), and <b>Spot</b> (cheap, interruptible).</li>
+  <li><b>Azure Hybrid Benefit</b> — reuse existing Windows Server / SQL licences to cut compute cost dramatically. Always check this for a migration from a licensed estate.</li>
+  <li><b>Consumption vs provisioned</b> — serverless (Functions, serverless SQL) bills per use; provisioned bills for reserved capacity. Match to traffic shape.</li>
+  <li><b>Microsoft Cost Management + Budgets</b> — track spend, set budgets/alerts, analyse by tag.</li>
+  <li><b>TCO Calculator</b> — builds the on-prem-vs-cloud business case (include hardware, power, ops labour, not just VM price).</li>
+</ul>
+<div class="box tip"><b>How to demonstrate it:</b> Cost is a first-class design input, not an afterthought. “Right-size from the Azure Migrate report, apply Hybrid Benefit, reserve the steady-state baseline, and let bursty load run on consumption” is a complete, credible cost story.</div>
+
+<!-- 15 -->
+<h2 id="execution"><span class="num">15</span>Executing the migration</h2>
+<ol>
+  <li><b>Discover &amp; assess</b> — inventory + dependency map + right-size + business case (sections 3–4).</li>
+  <li><b>Plan waves</b> — group workloads by dependency; migrate in order; nothing chatty left stranded across the link.</li>
+  <li><b>Build the landing zone</b> — networking, identity, policy, monitoring foundation.</li>
+  <li><b>Pilot</b> — migrate one low-risk workload end-to-end; prove the runbook.</li>
+  <li><b>Migrate data</b> — DMS online migration to keep downtime minimal; validate row counts and integrity.</li>
+  <li><b>Cutover</b> — DNS/traffic switch in a planned window, with a tested <b>rollback</b> path.</li>
+  <li><b>Validate</b> — functional, performance, and security tests against the migrated system.</li>
+  <li><b>Optimise (post-migration)</b> — right-size again on real telemetry, then refactor toward PaaS where it pays off.</li>
+</ol>
+<div class="box warn"><b>Always have a rollback.</b> A migration without a tested back-out plan is a gamble. Stating that you design cutover with a rollback window is, by itself, a strong seniority signal.</div>
+
+<!-- 16 -->
+<h2 id="decision"><span class="num">16</span>A decision cheat-sheet</h2>
+<p>Map a legacy trait straight to an Azure choice:</p>
+<table>
+  <tr><th>If the old system…</th><th>Lean toward…</th></tr>
+  <tr><td>is .NET Framework, Windows-only, hard dependencies</td><td>Rehost (VM) or App Service for Windows; refactor later.</td></tr>
+  <tr><td>is a standard ASP.NET / Core web app or API</td><td>App Service (+ deployment slots).</td></tr>
+  <tr><td>has Windows services / scheduled jobs / queue workers</td><td>Azure Functions or Container Apps.</td></tr>
+  <tr><td>is a real SQL Server using Agent/CLR/cross-DB</td><td>Azure SQL Managed Instance.</td></tr>
+  <tr><td>is one clean modern database</td><td>Azure SQL Database (serverless if bursty).</td></tr>
+  <tr><td>writes files to local disk</td><td>Blob (objects) or Azure Files (SMB share).</td></tr>
+  <tr><td>keeps in-memory session across requests</td><td>Externalise to Redis / SQL; make compute stateless.</td></tr>
+  <tr><td>stores secrets in config</td><td>Key Vault + Managed Identity (no secrets in code).</td></tr>
+  <tr><td>must talk to on-prem during transition</td><td>VPN Gateway / ExpressRoute + Private Endpoints.</td></tr>
+  <tr><td>has unknown dependencies</td><td>Run Azure Migrate dependency analysis <em>before</em> deciding anything.</td></tr>
+</table>
+
+<div class="box tip"><b>The one-paragraph answer that demonstrates the whole skill:</b> “I’d run Azure Migrate to inventory and dependency-map the estate, assign each workload a strategy from the 6 R’s — biased to rehost/replatform first — and land them in a governed landing zone. The web tier goes to App Service, background work to Functions, and the SQL Server to Managed Instance to preserve its surface area. I’d externalise session and files, replace config secrets with Key Vault + managed identity, secure data access over private endpoints, wire up Application Insights against an agreed SLA, codify it all in Bicep with a CI/CD pipeline, apply Hybrid Benefit and reservations for cost, and cut over in dependency-ordered waves with a tested rollback.” &mdash; That sentence touches every pillar and every section above.</div>
+
+<footer>
+  Prepared as a study/assessment map for a senior .NET developer new to Azure — the applied-judgment layer of the
+  <a href="index.html">Azure Expert Curriculum</a>; pair with Module 12 and the migration decision exercise in
+  <a href="assessment.md">assessment.md</a>. Product names current as of 2026 (Microsoft renames services
+  periodically — e.g. Azure AD → Microsoft Entra ID). Verified against Microsoft Learn, July 2026. Verify exact
+  SKUs, limits and pricing before committing to a design.
+  <a class="back" href="#">↑ Back to top</a>
+</footer>
+
+</div>
+</body>
+</html>

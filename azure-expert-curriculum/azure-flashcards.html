@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure — Flashcard Self-Test</title>
+<style>
+  :root{--ink:#16202c; --muted:#6a7686; --accent:#0a5ca8; --accent2:#13507e;
+        --ok:#1f7a4d; --bad:#b5402e; --card:#ffffff; --bg:#e8edf2;}
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink);
+       margin:0; background:linear-gradient(160deg,#dfe7ee,#eef2f6); min-height:100vh;}
+  .wrap{max-width:760px; margin:0 auto; padding:30px 20px 60px;}
+  header{text-align:center; margin-bottom:6px;}
+  h1{font-size:1.5rem; margin:0 0 4px; color:var(--accent2);}
+  .sub{color:var(--muted); font-size:.86rem;}
+  .bar{display:flex; align-items:center; gap:12px; justify-content:center; margin:16px 0 8px;
+       flex-wrap:wrap;}
+  select,button{font-family:inherit; font-size:.85rem; border-radius:7px; cursor:pointer;}
+  select{padding:7px 10px; border:1px solid #b9c4d0; background:#fff;}
+  button{border:0; padding:8px 15px; font-weight:600; background:#fff; color:var(--accent);
+         border:1px solid #b9c4d0;}
+  button.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+  button:hover{filter:brightness(.97);}
+  .progress{font-size:.8rem; color:var(--muted); text-align:center; margin-bottom:10px;}
+  .scene{perspective:1600px;}
+  .card{position:relative; width:100%; min-height:320px; cursor:pointer; transition:transform .5s;
+        transform-style:preserve-3d; margin:0 auto;}
+  .card.flipped{transform:rotateY(180deg);}
+  .face{position:absolute; inset:0; backface-visibility:hidden; border-radius:16px;
+        box-shadow:0 10px 30px rgba(20,40,70,.16); padding:30px 32px; display:flex;
+        flex-direction:column; justify-content:center; background:var(--card);}
+  .face .tag{position:absolute; top:14px; left:18px; font-size:.66rem; font-weight:700;
+             letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--accent);
+             padding:3px 10px; border-radius:20px;}
+  .face .hint{position:absolute; bottom:14px; left:0; right:0; text-align:center;
+              font-size:.72rem; color:var(--muted);}
+  .front .q{font-size:1.18rem; line-height:1.5; font-weight:600; text-align:center;}
+  .back{transform:rotateY(180deg); background:#f4f9f5; border:1px solid #cfe7d8;}
+  .back .a{font-size:1.0rem; line-height:1.55;}
+  .back .tag{background:var(--ok);}
+  .back b{color:var(--ok);}
+  .controls{display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;}
+  .know{display:flex; gap:10px; justify-content:center; margin-top:12px;}
+  .know button.good{border-color:var(--ok); color:var(--ok);}
+  .know button.again{border-color:var(--bad); color:var(--bad);}
+  .stats{text-align:center; font-size:.8rem; color:var(--muted); margin-top:14px;}
+  kbd{background:#eef1f4; border:1px solid #cdd5de; border-bottom-width:2px; border-radius:4px;
+      padding:1px 6px; font-size:.74rem; font-family:inherit;}
+  .legend{text-align:center; font-size:.74rem; color:var(--muted); margin-top:18px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Azure — Flashcard Self-Test</h1>
+    <div class="sub">Click the card to reveal the answer. Drill until the “expert signal” comes automatically.</div>
+  </header>
+
+  <div class="bar">
+    <select id="cat" onchange="applyFilter()"></select>
+    <button onclick="shuffle()">🔀 Shuffle</button>
+    <button onclick="reset()">↺ Reset</button>
+  </div>
+  <div class="progress" id="prog">—</div>
+
+  <div class="scene">
+    <div class="card" id="card" onclick="flip()">
+      <div class="face front"><span class="tag" id="ftag">—</span>
+        <div class="q" id="q">Loading…</div>
+        <div class="hint">click / press <kbd>Space</kbd> to flip</div>
+      </div>
+      <div class="face back"><span class="tag">Answer</span>
+        <div class="a" id="a"></div>
+        <div class="hint">click to flip back</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="prev()">◀ Prev</button>
+    <button class="primary" onclick="next()">Next ▶</button>
+  </div>
+  <div class="know">
+    <button class="good" onclick="mark(true)">✓ Knew it</button>
+    <button class="again" onclick="mark(false)">✕ Review again</button>
+  </div>
+  <div class="stats" id="stats"></div>
+
+  <div class="legend">
+    Keys: <kbd>Space</kbd> flip · <kbd>→</kbd> next · <kbd>←</kbd> prev · <kbd>K</kbd> knew it · <kbd>J</kbd> review<br>
+    Verified vs Microsoft Learn, Jul 2026 · 84 cards · part of the <a href="index.html">Azure Expert Curriculum</a> — filter the category matching your current module.
+  </div>
+</div>
+
+<script>
+const CARDS = [
+  ["Mental model","Define elasticity vs scalability vs resilience.","<b>Elasticity</b> = auto scale out/in with demand. <b>Scalability</b> = the ceiling you can reach. <b>Resilience</b> = surviving failure. Design each deliberately — don't conflate them."],
+  ["Mental model","What's the difference between the control plane and the data plane?","<b>Control plane</b> = Azure Resource Manager (ARM) creating/configuring resources. <b>Data plane</b> = the resource doing its job (a SQL query, a blob upload). RBAC and APIs differ between them."],
+  ["Mental model","Explain the shared responsibility model and how it shifts.","Azure secures the cloud platform; you secure what you put in it. The line moves up the ladder: IaaS (you manage OS↑) → PaaS (app+data) → FaaS (just code) → SaaS (just config)."],
+  ["Frameworks","Name the 5 pillars of the Well-Architected Framework.","<b>Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency.</b> Narrate any design as trade-offs across these five."],
+  ["Frameworks","WAF vs CAF — what's the difference?","<b>WAF</b> judges the quality of one workload (5 pillars). <b>CAF</b> is the org-level journey: Strategy→Plan→Ready→Adopt→Govern→Manage. Name the right one for the altitude."],
+  ["Hierarchy","Give the resource hierarchy top to bottom, and what inherits.","Management Group → Subscription → Resource Group → Resource. <b>RBAC and Azure Policy inherit downward</b> — assign at a high scope to govern everything beneath."],
+  ["Hierarchy","Region vs Availability Zone — and how many AZs should you design across?","A region is a set of datacenters; an <b>AZ</b> is one or more physically isolated DCs (independent power/cooling/network). Design across <b>≥3 AZs</b> for zone-redundant resilience without multi-region cost."],
+  ["Hierarchy","What three factors pick a region?","<b>Latency to users, data-residency law, and service availability</b> (not every service is in every region)."],
+  ["Identity","How does an app authenticate to SQL/Storage/Key Vault with no secrets?","Give it a <b>Managed Identity</b> → assign it an RBAC role on the target → it authenticates with an Entra <b>token, never a password</b>. Secrets that must exist live in <b>Key Vault</b>."],
+  ["Identity","What do PIM and Conditional Access each do?","<b>PIM</b> = just-in-time, time-boxed, approved elevation for admin roles. <b>Conditional Access</b> = policy engine enforcing Zero Trust (e.g. require MFA from untrusted networks, block legacy auth)."],
+  ["Identity","Why is 'identity is the perimeter' the key security idea in cloud?","There's no network edge to hide behind — anything is reachable. So access decisions hinge on verified identity + least privilege + conditional policy, not network location."],
+  ["Compute","Give the compute ladder and the selection rule.","VM → VMSS → App Service → Functions → Container Apps → AKS → ACI → Batch. <b>Default to the most managed option the workload allows</b>; step down to VMs only when a real constraint forces it — and justify it."],
+  ["Compute","What does 'serverless' actually buy you?","You stop paying for idle. Functions and Container Apps can <b>scale to zero</b> and bill per request/second — ideal for spiky/unpredictable load, the opposite of a 24/7 reserved VM."],
+  ["Compute","When should you NOT use AKS?","When you have only a handful of services. AKS is an operational commitment (upgrades, node patching, networking, RBAC). Container Apps or App Service give ~80% of the value with a fraction of the ops."],
+  ["Networking","Order the load-balancing options from local to global.","<b>Load Balancer</b> (L4, regional) → <b>Application Gateway</b> (L7 + WAF, regional) → <b>Front Door</b> (global L7 + CDN + WAF) → <b>Traffic Manager</b> (DNS-based global routing)."],
+  ["Networking","How do you make a PaaS database not publicly reachable?","A <b>Private Endpoint</b> (Private Link) — gives the SQL/Storage service a private IP inside your VNet and removes public exposure. Pair with a Private DNS Zone."],
+  ["Networking","Describe the hub-spoke topology.","A central <b>hub</b> VNet holds shared services (firewall, DNS, on-prem gateway); <b>spoke</b> VNets hold workloads and peer to the hub. The reference enterprise network design."],
+  ["Networking","VPN Gateway vs ExpressRoute?","<b>VPN Gateway</b> = encrypted tunnel over the public internet. <b>ExpressRoute</b> = a private, dedicated circuit — higher bandwidth, lower latency, no public internet."],
+  ["Storage","What four services live in a storage account, and what are the blob tiers?","<b>Blob, File, Queue, Table.</b> Blob tiers: <b>Hot / Cool / Cold / Archive</b> (plus the newer <b>Smart tier</b> that auto-moves by usage). Match tier to data temperature."],
+  ["Storage","Order the redundancy options and what drives the choice.","<b>LRS</b> (3 copies, 1 DC) → <b>ZRS</b> (across zones) → <b>GRS/GZRS</b> (across regions). Choose by RPO and compliance/data-residency."],
+  ["Databases","When SQL DB vs Managed Instance vs SQL-on-VM?","<b>SQL Database</b> = a single modern managed DB (serverless/elastic). <b>Managed Instance</b> = near-full SQL Server surface for lift & shift (Agent, CLR, cross-DB). <b>SQL-on-VM</b> = full OS/instance control."],
+  ["Databases","List Cosmos DB's 5 consistency levels and the theorem they illustrate.","Strong → Bounded Staleness → Session → Consistent Prefix → Eventual. A clean illustration of the <b>CAP / PACELC theorem</b> (MS docs cite PACELC): trade consistency for latency/availability explicitly."],
+  ["Databases","OLTP vs OLAP — why keep them apart?","OLTP (SQL, Cosmos) serves the live app; OLAP (Synapse, Fabric, Data Lake) serves reporting/ML. Don't run heavy analytics on the transactional store — separate them."],
+  ["Messaging","Event vs Message — and which service for each?","<b>Event</b> = something happened (a fact) → Event Grid / Event Hubs. <b>Message</b> = please do something (intent) → Service Bus. Messaging buys loose coupling + independent scaling."],
+  ["Messaging","Service Bus vs Event Grid vs Event Hubs?","<b>Service Bus</b> = enterprise messaging (queues/topics, ordering, dead-letter). <b>Event Grid</b> = discrete reactive event notifications (pub/sub). <b>Event Hubs</b> = high-volume telemetry/event streaming."],
+  ["Integration","What does API Management (APIM) provide?","A gateway in front of your APIs: authentication, throttling/rate-limiting, versioning, transformation, and a developer portal."],
+  ["AI","What is Microsoft Foundry and what did it replace?","The unified AI PaaS (rebrand of <b>Azure AI Studio / Azure AI Foundry</b>) for building/deploying GenAI apps and <b>agents</b>. Azure OpenAI is now a Foundry resource; old Azure AI Services surface as <b>Foundry Tools</b>."],
+  ["AI","Describe a governed RAG pattern on Azure.","Data in Blob/Data Lake → embeddings indexed in <b>Azure AI Search</b> → an Azure OpenAI model grounded on retrieved chunks → exposed via APIM with managed-identity auth and App Insights tracing."],
+  ["Security","State the three Zero Trust principles.","<b>Verify explicitly · Use least privilege · Assume breach.</b>"],
+  ["Security","Defender for Cloud vs Sentinel?","<b>Defender for Cloud</b> = posture management (Secure Score) + workload threat protection. <b>Sentinel</b> = cloud-native SIEM/SOAR for detection, hunting, and automated response."],
+  ["Security","What is defense in depth?","Layer controls — identity → network → host → app → data — so no single failure is fatal. Combine with least privilege and assume-breach."],
+  ["Governance","What is a landing zone and why deploy into one?","A pre-built, governed Azure foundation (networking, identity, policy, monitoring) — the CAF 'Ready' phase. Workloads land into it so security and cost controls exist from day one."],
+  ["Cost","Give a complete FinOps cost story for a migration.","Right-size from telemetry/Azure Migrate, apply <b>Azure Hybrid Benefit</b> (reuse Windows/SQL licences), <b>reserve</b> the steady-state baseline, run bursty load on consumption, and allocate every cost with <b>tags</b>."],
+  ["Cost","Name the main pricing levers.","Pay-as-you-go, <b>Reservations</b> (1/3-yr commit), <b>Savings Plans</b> (flexible commit), <b>Spot</b> (cheap/interruptible), and <b>Azure Hybrid Benefit</b>."],
+  ["IaC","What does 'declarative / idempotent' mean and why beat the portal?","IaC describes the <b>desired state</b>; the engine reconciles reality to it, same result every run. It's reviewable, repeatable, auditable — portal-clicking isn't. Start with <b>Bicep</b>."],
+  ["IaC","How do you get zero-downtime deploys on App Service?","<b>Deployment slots</b> — deploy to a staging slot, warm it, then swap (blue-green). Roll back by swapping again."],
+  ["Observability","Name the three pillars of observability.","<b>Metrics</b> (what), <b>Logs</b> (why), <b>Traces</b> (where). Together they answer 'is it healthy, and if not, where's the fault?'"],
+  ["Observability","Which tools, and what language queries the logs?","Azure Monitor (umbrella) + Application Insights (APM) + Log Analytics. Query logs with <b>KQL</b> (Kusto Query Language). Alerts → Action Groups."],
+  ["Reliability","AZs vs multi-region — what does each protect against?","<b>Availability Zones</b> survive a datacenter fault within a region. <b>Multi-region</b> survives a whole-region outage (usually active-passive for cost)."],
+  ["Reliability","What are RTO and RPO, and who sets them?","<b>RTO</b> = max acceptable downtime; <b>RPO</b> = max acceptable data loss. The <b>business</b> sets them — they define the whole DR design. Ask first."],
+  ["Reliability","How does a composite SLA work?","Services chained in series <b>multiply</b> their SLAs (two 99.9% ≈ 99.8%). Redundancy raises it back. Every extra 'nine' costs money — design to the stated SLA, no more."],
+  ["Career","Which cert signals architecture judgement, and its prerequisite?","<b>AZ-305</b> (Azure Solutions Architect Expert). It requires <b>AZ-104</b> first and a 700 pass score. Ladder: AZ-900 → AZ-104 → AZ-305; specialise with AZ-204/500/700, DP-203, AI-102."],
+  ["Career","Give a one-line reference architecture you can defend across all 5 pillars.","App Service (zone-redundant) → SQL via Private Endpoint → Key Vault + Managed Identity → Front Door + WAF → App Insights → Bicep + CI/CD → Reserved + Hybrid Benefit."],
+  ["Career","The 5 things to always close the loop on in any design?","<b>Identity</b> (managed identity, least priv), <b>Network</b> (private, segmented), <b>Reliability</b> (zones, SLA, DR), <b>Observability</b> (monitor + alerts), <b>Cost</b> (right-size, reserve, tag)."],
+
+  [".NET on Azure","What does DefaultAzureCredential resolve to locally vs deployed, and the production-hardening tip?","Locally: your <b>az login / Visual Studio</b> identity. Deployed: the app's <b>managed identity</b>. Same code both places. Harden prod by pinning <b>ManagedIdentityClientId</b> (user-assigned MI) — skips chain probing, unambiguous."],
+  [".NET on Azure","How does a .NET app connect to Azure SQL with no password?","Connection string: <code>Authentication=Active Directory Default;</code> (no user/password) + in the DB: <b>CREATE USER [mi-name] FROM EXTERNAL PROVIDER</b> + role grants. Microsoft.Data.SqlClient fetches the Entra token."],
+  [".NET on Azure","System-assigned vs user-assigned managed identity — which for IaC estates and why?","<b>User-assigned</b>: it's a standalone resource — pre-provisionable, shared, survives app recreation, roles grantable <em>before</em> the app exists. System-assigned: 1:1 convenience for one-offs."],
+  [".NET on Azure","Key Vault reference vs Key Vault config provider — when each?","<b>Reference</b> (@Microsoft.KeyVault(...) in app settings): zero code change, platform resolves it. <b>Config provider</b> (AddAzureKeyVault): secrets in IConfiguration, works anywhere incl. containers. Both use MI."],
+  [".NET on Azure","What do Aspire's AppHost and ServiceDefaults each contribute?","<b>AppHost</b>: declares the distributed app in C# (services, DBs, buses + wiring) — the local orchestrator. <b>ServiceDefaults</b>: one-line OTel + health checks + resilience defaults into every service. <b>azd up</b> deploys the model to Container Apps/App Service."],
+  ["App Service","What does a slot swap actually swap, and what do sticky settings do?","Swap exchanges <b>routing</b> between slots (after warming the target). Settings marked 'deployment slot setting' <b>stay with the slot</b> (e.g. Environment=Staging); unmarked settings travel with the app content. Mis-marking = the classic swap incident."],
+  ["App Service","Why is run-from-package the production default?","App runs directly from the mounted zip: <b>atomic</b> deploys (no half-copied files), <b>read-only wwwroot</b> (no drift), faster cold start. Set WEBSITE_RUN_FROM_PACKAGE=1."],
+  ["App Service","Inbound vs outbound networking features — name both.","Inbound: <b>Private Endpoint</b> (app gets a private IP; disable public access). Outbound: <b>VNet Integration</b> (regional; delegated subnet; app's egress originates in your VNet → can reach private endpoints/on-prem). Apps often need both."],
+  ["App Service","What is SNAT exhaustion and two mitigations?","Outbound connections through shared NAT ports run out under load → mysterious connect failures. Mitigate: <b>reuse connections</b> (singleton HttpClient/HttpClientFactory, pooling) and <b>NAT Gateway</b> on the integrated subnet (or private endpoints — no SNAT needed)."],
+  ["Functions","What happens 2026-11-10 and what must .NET Functions apps do?","<b>In-process model support ends.</b> Migrate to the <b>isolated worker model</b> (own process, full DI/middleware, any supported .NET incl. .NET Framework 4.8). Isolated is also required for Flex Consumption."],
+  ["Functions","Why is Flex Consumption the recommended serverless plan?","Serverless pay-per-use <b>plus</b>: scale to ~1000 instances, per-function scaling, <b>VNet integration</b>, memory choices (512/2048/4096 MB), and <b>always-ready instances</b> to kill cold starts. Classic Consumption lacks VNet + those controls."],
+  ["Functions","What is an identity-based connection for a trigger?","Instead of a connection-string app setting: <code>SbConn__fullyQualifiedNamespace = mybus.servicebus.windows.net</code> + a role for the app's MI. Trigger config unchanged (Connection=\"SbConn\"). No secrets."],
+  ["Functions","The iron law of Durable orchestrator code?","<b>Deterministic only</b> — it replays from history. No DateTime.Now, Guid.NewGuid, or direct I/O; use ctx.CurrentUtcDateTime and put all I/O in <b>activities</b>."],
+  ["Containers","How does Container Apps pull from ACR with zero credentials?","The app's <b>managed identity</b> gets the <b>AcrPull</b> role on the registry; admin user disabled. Same pattern as all service-to-service auth."],
+  ["Containers","ACA revisions vs App Service slots — one thing revisions do that slots can't?","Revisions are <b>immutable versions</b> with <b>weighted traffic splitting across N revisions</b> (e.g. 90/9/1 canary) and instant rollback by re-weighting. Slots: two-way swap, max one staging target per swap."],
+  ["Containers","Which KEDA setup makes a queue worker pay-per-backlog?","<b>minReplicas: 0</b> + a Service Bus (or similar) scaler targeting queue length. Zero messages → zero replicas → zero compute cost; backlog wakes it."],
+  ["Data — SQL","GP vs Business Critical vs Hyperscale — one differentiator each.","<b>GP</b>: remote storage, cheapest prod default. <b>BC</b>: local SSD + readable replica, lowest latency. <b>Hyperscale</b>: 100TB+, fast scale ops, snapshot backups, ≥0 read replicas."],
+  ["Data — SQL","What breaks naively with serverless auto-pause, and the fix?","First connection after pause <b>fails/stalls</b> while resuming. Fix: transient-fault retry (EF <code>EnableRetryOnFailure</code>) + accept seconds of resume latency — a feature for dev/spiky apps, not a bug."],
+  ["Data — SQL","Why not run EF migrations at app startup in prod?","Multi-instance <b>races</b>, long locks under traffic, and startup failure = outage. Apply migrations as a <b>pipeline step</b> (bundle/script), expand→contract for zero-downtime."],
+  ["Data — Cosmos","Why does a hot partition throttle even when total RU/s looks sufficient?","RU/s divide <b>evenly across physical partitions</b>. 10k RU/s over 10 partitions = 1k each; one hot key can 429 on its partition while others idle. Fix the key, not the retry count."],
+  ["Data — Cosmos","Three properties of a good partition key?","<b>High cardinality</b>, <b>even request distribution</b> (not just data), and <b>matches the dominant query filter</b> (point reads/single-partition queries). Synthetic keys (tenantId_bucket) and hierarchical keys (/tenant/user) when no natural fit."],
+  ["Data — Cosmos","What is the change feed and one killer use?","An ordered per-partition <b>log of inserts/updates</b> you can subscribe to (Functions trigger / processor library). Killer use: <b>materialized views/projections</b> that heal themselves; also cache invalidation, downstream events. (No deletes — use TTL/soft-delete markers.)"],
+  ["Storage","User-delegation SAS vs account-key SAS?","User-delegation SAS is signed with an <b>Entra token</b> (your identity), not the account key: revocable via identity, no key exposure, auditable. Pattern: API issues short-lived single-blob SAS; client uploads directly."],
+  ["Messaging","Walk the peek-lock lifecycle.","Receive → message <b>locked</b> → process → <b>Complete</b> (done) / <b>Abandon</b> (redeliver now) / <b>DeadLetter</b> (park with reason) / lock expiry (redeliver later). DeliveryCount++ each redelivery; exceed MaxDeliveryCount → auto-DLQ."],
+  ["Messaging","Why doesn't broker duplicate-detection remove the need for idempotent consumers?","Dedup drops repeated <b>MessageId</b> on the <em>send</em> side window. Redelivery after a crash <em>post-processing</em> is the same message again — only <b>consumer idempotency</b> (processed-id gate / natural upserts) survives that."],
+  ["Messaging","Draw the transactional outbox in words.","Write business row <b>+ outbox row in the same DB transaction</b>; a relay reads outbox → publishes → marks sent. Crash anywhere = either not committed (nothing happened) or committed-and-will-publish (relay retries). No lost, no phantom events."],
+  ["Messaging","Service Bus sessions — what do they buy and cost?","<b>FIFO + exclusive consumption per SessionId</b> (e.g. per-order ordering with cross-order parallelism). Cost: parallelism is bounded by number of active sessions; a slow session blocks only itself."],
+  ["Networking","Private endpoint DNS: why do clients keep the public hostname, and what two artifacts make it work?","TLS/SDKs expect the real name; resolution walks a CNAME to <code>*.privatelink.*</code>. You need the matching <b>Private DNS Zone</b> (per service type) with the A record (via <b>DNS zone group</b>), <b>linked to every VNet</b> that must resolve it. Wrong/unlinked zone = public IP answer = the classic failure."],
+  ["Networking","Service endpoint vs private endpoint — three differences.","SE: subnet-sourced traffic to the <b>whole service</b>, service keeps public IP, no on-prem reach. PE: a <b>NIC with private IP for one resource instance</b>, public access can be fully disabled, works from on-prem via hybrid link. Prefer PE."],
+  ["Networking","Front Door vs Application Gateway — pick per scenario.","<b>FD</b>: global anycast L7 + CDN + WAF + Private Link origins → internet-facing/global. <b>AppGW</b>: regional L7 + WAF, private-only ingress possible → single-region or strictly-regional data paths. Compose FD→AppGW only with a reason."],
+  ["Observability","What propagates distributed traces in .NET, and name three auto-instrumented hops.","W3C <b>traceparent</b> context via Activity. Auto: HttpClient, Microsoft.Data.SqlClient, Azure SDKs (incl. <b>Service Bus message hops</b>) — so HTTP→queue→worker→SQL is one trace in App Insights."],
+  ["Observability","Metric alerts vs log alerts?","<b>Metric</b>: near-real-time, cheap, numeric conditions (5xx rate, CPU, DLQ depth). <b>Log (KQL)</b>: expressive queries, minutes latency, per-evaluation cost. Golden signals use both; page on <b>error-budget burn</b>, not every blip."],
+  ["Observability","Your KQL for 'failure rate by operation, last hour'?","<code>AppRequests | where TimeGenerated &gt; ago(1h) | summarize total=count(), failed=countif(Success==false) by OperationName | extend pct=100.0*failed/total | order by pct desc</code>"],
+  ["IaC","What replaced complete-mode deployments and what does it add?","<b>Deployment stacks</b>: manage a set of resources as a unit — cleanup of removed resources, <b>deny-settings</b> blocking out-of-band edits, clean teardown. Plus <code>what-if</code> as the preview gate."],
+  ["IaC","How does a GitHub Actions pipeline deploy with zero stored secrets?","<b>Workload identity federation (OIDC)</b>: workflow gets a GitHub-issued token; a federated credential on the app/MI matches repo+environment; Entra exchanges it for an Azure token. Only IDs in the repo; nothing to leak or rotate."],
+  ["IaC","Why must schema migrations be backward-compatible for one release?","Slots/canary mean <b>old and new code run against the same DB simultaneously</b> during rollout (and rollback re-activates old code). Expand → deploy → contract; never destructive in the release that ships the dependent code."],
+  ["Architecture","Compute the composite SLA: FD 99.99% × App 99.95% × SQL 99.99%.","Multiply: ≈ <b>99.93%</b> (~6h/yr). Chains multiply down; redundancy compensates. Your SLO must be ≤ the chain — and shortening the synchronous chain (queues) raises what you can promise."],
+  ["Architecture","RTO 4h / RPO 15min on a modest budget — which resilience rung?","<b>Active-passive multi-region</b>: SQL failover group (RPO minutes), GZRS storage, Front Door priority routing + health probes, rehearsed runbook. Active-active is unjustified; zone-redundancy alone can't survive region loss."],
+  ["Architecture","Name the five FinOps levers.","<b>Right-size from telemetry</b> · <b>Reservations/Savings Plans</b> on the baseline · <b>consumption</b> pricing for spiky load · <b>Hybrid Benefit</b> for carried licences · <b>waste patrol</b> (orphans, log retention, off-hours dev, lifecycle rules, egress)."],
+  ["Architecture","What is the deployment-stamp pattern and when does it beat geo-replication?","Independent full copies of the system per geography/scale-unit; tenants assigned to a stamp. Beats one global deployment when <b>data residency</b>, blast-radius isolation, or per-tenant scale demand it — routing by tenancy, not per-request."]
+];
+
+let deck = [], i = 0, known = new Set();
+
+function buildCats(){
+  const cats = ["All", ...Array.from(new Set(CARDS.map(c=>c[0])))];
+  const sel = document.getElementById('cat');
+  sel.innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
+}
+function applyFilter(){
+  const c = document.getElementById('cat').value;
+  deck = CARDS.map((card,idx)=>idx).filter(idx => c==="All" || CARDS[idx][0]===c);
+  i = 0; known.clear(); render();
+}
+function render(){
+  const card = document.getElementById('card');
+  card.classList.remove('flipped');
+  if(!deck.length){document.getElementById('q').textContent="No cards."; return;}
+  const idx = deck[i];
+  document.getElementById('ftag').textContent = CARDS[idx][0];
+  document.getElementById('q').textContent = CARDS[idx][1];
+  document.getElementById('a').innerHTML = CARDS[idx][2];
+  document.getElementById('prog').textContent = `Card ${i+1} of ${deck.length}`;
+  updateStats();
+}
+function flip(){ document.getElementById('card').classList.toggle('flipped'); }
+function next(){ if(!deck.length)return; i=(i+1)%deck.length; render(); }
+function prev(){ if(!deck.length)return; i=(i-1+deck.length)%deck.length; render(); }
+function mark(good){
+  const idx = deck[i];
+  if(good) known.add(idx); else known.delete(idx);
+  next();
+}
+function shuffle(){
+  for(let k=deck.length-1;k>0;k--){ const j=(k*7+i*13+3)%(k+1); [deck[k],deck[j]]=[deck[j],deck[k]]; }
+  i=0; render();
+}
+function reset(){ known.clear(); applyFilter(); }
+function updateStats(){
+  document.getElementById('stats').textContent = `Known: ${known.size} / ${deck.length}`;
+}
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space'){e.preventDefault(); flip();}
+  else if(e.code==='ArrowRight') next();
+  else if(e.code==='ArrowLeft') prev();
+  else if(e.key==='k'||e.key==='K') mark(true);
+  else if(e.key==='j'||e.key==='J') mark(false);
+});
+buildCats(); applyFilter();
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Cloud Expertise — Concept Mastery Map</title>
+<style>
+  :root{
+    --ink:#1b2330; --muted:#5c6675; --line:#e3e7ec; --accent:#0a5ca8;
+    --accent-soft:#e9f1f9; --concept:#13507e; --sig:#1f7a4d; --sig-bg:#e9f7ef;
+    --warn-bg:#fff6e6; --warn-line:#d99b2b; --cmd-bg:#0f1b2a; --cmd-ink:#cfe3f7;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink); line-height:1.62; margin:0; background:#fbfcfd;}
+  .wrap{max-width:1000px; margin:0 auto; padding:40px 26px 110px;}
+  header{border-bottom:3px solid var(--accent); padding-bottom:18px;}
+  h1{font-size:1.8rem; margin:0 0 6px; line-height:1.2;}
+  .sub{color:var(--muted); font-size:.98rem;}
+  h2{font-size:1.34rem; margin-top:48px; padding:8px 0 6px;
+     border-bottom:2px solid var(--accent-soft); color:var(--accent); scroll-margin-top:14px;}
+  h2 .num{display:inline-block; min-width:1.7em; color:#fff; background:var(--accent);
+          border-radius:6px; text-align:center; font-size:.82em; padding:0 6px; margin-right:10px;}
+  h3{font-size:1.07rem; margin-top:24px; color:#16263a;}
+  p{margin:11px 0;} ul,ol{margin:10px 0; padding-left:22px;} li{margin:6px 0;}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:.92rem;}
+  th,td{border:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top;}
+  th{background:var(--accent-soft);} tr:nth-child(even) td{background:#f7f9fb;}
+  .concept{border-left:4px solid var(--concept); background:#eef4fa; padding:11px 15px;
+           margin:14px 0; border-radius:0 7px 7px 0;}
+  .concept b{color:var(--concept);}
+  .sig{border-left:4px solid var(--sig); background:var(--sig-bg); padding:11px 15px;
+       margin:14px 0; border-radius:0 7px 7px 0;}
+  .sig b{color:var(--sig);}
+  .warn{border-left:4px solid var(--warn-line); background:var(--warn-bg); padding:11px 15px;
+        margin:14px 0; border-radius:0 7px 7px 0;} .warn b{color:#b9791a;}
+  pre.cmd{background:var(--cmd-bg); color:var(--cmd-ink); padding:12px 15px; border-radius:8px;
+          overflow-x:auto; font-family:"Cascadia Code",Consolas,monospace; font-size:.83rem;
+          line-height:1.5; margin:12px 0;}
+  pre.cmd .c{color:#7f9bb5;} /* comment */
+  pre.cmd .k{color:#6fc28a;} /* command keyword */
+  code{background:#eef1f4; padding:1px 6px; border-radius:4px; font-size:.9em;
+       font-family:"Cascadia Code",Consolas,monospace;}
+  nav.toc{background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 22px;
+          margin:24px 0 8px; columns:2; column-gap:34px;}
+  nav.toc a{display:block; color:var(--accent); text-decoration:none; padding:3px 0;
+            font-size:.92rem; break-inside:avoid;}
+  nav.toc a:hover{text-decoration:underline;}
+  @media(max-width:680px){nav.toc{columns:1;} .wrap{padding:28px 16px 80px;}}
+  .banner{background:var(--concept); color:#fff; border-radius:10px; padding:16px 20px;
+          margin:22px 0; font-size:.96rem;}
+  .banner code{background:rgba(255,255,255,.18); color:#fff;}
+  footer{margin-top:54px; padding-top:16px; border-top:1px solid var(--line);
+         color:var(--muted); font-size:.85rem;}
+  .back{font-size:.78rem; color:var(--muted); text-decoration:none; float:right;}
+  .back:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Azure Cloud Expertise — A Concept-Mastery Map</h1>
+  <div class="sub">Not a command cheat-sheet. The goal is to <b>understand every capability of Azure</b> well enough to make decisions and explain trade-offs to any employer. Commands are included only as documentation.</div>
+</header>
+
+<div class="banner">
+  <b>Philosophy of this document.</b> Expertise is no longer about memorising <code>az</code> syntax — an AI assistant can compose and run any command on demand. What an employer pays for is <b>judgement</b>: knowing which service solves which problem, what the trade-offs are, and how the pieces fit into a secure, reliable, cost-effective whole. So each section leads with <b>concepts and decision signals</b>, and lists a representative command purely <em>for the record</em>. Treat every <code>pre</code> block as “this is the shape of the action; the AI executes it.”
+</div>
+
+<div class="sig">
+  <b>This map is the 30,000-ft view of a full curriculum.</b> It gives you the whole platform in one sitting;
+  the <a href="index.html">Azure Expert Curriculum</a> in this folder zooms each section into a deep module with
+  .NET code, decision frameworks, a hands-on lab, and self-checks. Read this document once <em>before</em>
+  Module&nbsp;01, then re-read it monthly — you'll notice it keeps getting denser as the modules fill in the details.
+  Suggested pairing: §4→Module 02 · §5–6→Modules 03–05 · §8–9→Modules 06–07 · §11→Module 08 · §7→Module 09 ·
+  §16→Module 10 · §15→Module 11 · §17–18→Module 12.
+</div>
+
+<nav class="toc">
+  <a href="#model">1 · The cloud mental model</a>
+  <a href="#global">2 · Global infrastructure</a>
+  <a href="#hierarchy">3 · Hierarchy &amp; the control plane</a>
+  <a href="#identity">4 · Identity &amp; access (Entra)</a>
+  <a href="#compute">5 · Compute spectrum</a>
+  <a href="#containers">6 · Containers &amp; orchestration</a>
+  <a href="#network">7 · Networking</a>
+  <a href="#storage">8 · Storage</a>
+  <a href="#data">9 · Databases</a>
+  <a href="#analytics">10 · Data &amp; analytics</a>
+  <a href="#integration">11 · Messaging &amp; integration</a>
+  <a href="#ai">12 · AI &amp; machine learning</a>
+  <a href="#security">13 · Security &amp; Zero Trust</a>
+  <a href="#governance">14 · Governance &amp; cost</a>
+  <a href="#iac">15 · IaC &amp; DevOps</a>
+  <a href="#observability">16 · Observability</a>
+  <a href="#reliability">17 · Reliability &amp; DR</a>
+  <a href="#frameworks">18 · WAF &amp; CAF</a>
+  <a href="#prove">19 · Proving expertise</a>
+</nav>
+
+<!-- 1 -->
+<h2 id="model"><span class="num">1</span>The cloud mental model</h2>
+<p>Everything else hangs off four ideas. Internalise these and the rest is detail.</p>
+<ul>
+  <li><b>Shared Responsibility.</b> Azure secures the cloud <em>of</em> the platform; you secure what you put <em>in</em> it. The line moves with the service model.</li>
+  <li><b>The service-model ladder.</b> <b>IaaS</b> (you manage OS upward) → <b>PaaS</b> (you manage app + data) → <b>FaaS/serverless</b> (you manage just code) → <b>SaaS</b> (you manage only configuration). Higher = less ops, less control.</li>
+  <li><b>Control plane vs data plane.</b> Azure Resource Manager (ARM) is the <em>control plane</em> — it creates/configures resources. The <em>data plane</em> is the resource doing its job (a query hitting SQL, a blob upload). RBAC and APIs differ between them.</li>
+  <li><b>Everything is a resource with an ID.</b> Every object has a unique ARM resource ID, lives in a resource group, is described declaratively, and is governed by policy, RBAC, locks and tags. Master this and Azure becomes uniform.</li>
+</ul>
+<div class="concept"><b>Concept that signals depth:</b> <b>Elasticity vs scalability vs resilience</b> are different. Elasticity = scale out/in automatically with demand. Scalability = the ceiling you <em>can</em> reach. Resilience = surviving failure. Many candidates conflate them; an expert separates them and designs for each deliberately.</div>
+
+<!-- 2 -->
+<h2 id="global"><span class="num">2</span>Global infrastructure</h2>
+<ul>
+  <li><b>Geography → Region → Availability Zone → Datacenter.</b> A <b>region</b> is a set of datacenters; an <b>Availability Zone (AZ)</b> is one or more physically isolated datacenters within a region with independent power/cooling/network.</li>
+  <li><b>Region pairs.</b> Most regions pair with another in the same geography for replication and sequential platform updates — the basis of geo-redundancy and data-residency compliance.</li>
+  <li><b>Edge &amp; sovereignty.</b> Edge zones, Front Door PoPs, and sovereign/government clouds matter for latency and regulated data.</li>
+</ul>
+<div class="sig"><b>Expert signal:</b> Pick a region for three reasons together — <b>latency to users, data-residency law, and service availability</b> (not every service is in every region). Then design across <b>≥3 AZs</b> for zone-redundant resilience without multi-region cost.</div>
+<pre class="cmd"><span class="c"># For the record — list regions and which support availability zones</span>
+<span class="k">az</span> account list-locations --query "[].{Region:name}" -o table</pre>
+
+<!-- 3 -->
+<h2 id="hierarchy"><span class="num">3</span>Resource hierarchy &amp; the control plane</h2>
+<table>
+  <tr><th>Scope</th><th>Purpose</th></tr>
+  <tr><td><b>Management Group</b></td><td>Apply RBAC + Policy across many subscriptions (org-wide guardrails).</td></tr>
+  <tr><td><b>Subscription</b></td><td>Billing &amp; isolation boundary; holds quotas/limits.</td></tr>
+  <tr><td><b>Resource Group</b></td><td>Lifecycle unit — deploy, secure, and delete related resources together.</td></tr>
+  <tr><td><b>Resource</b></td><td>The individual service instance.</td></tr>
+</table>
+<p>Cross-cutting controls applied at any scope: <b>RBAC</b> (who can do what), <b>Azure Policy</b> (what’s allowed), <b>Tags</b> (metadata/cost), <b>Resource Locks</b> (prevent accidental delete), <b>Azure Resource Graph</b> (query the whole estate with KQL).</p>
+<div class="concept"><b>Inheritance:</b> RBAC and Policy <em>flow downward</em> — a role or policy at a management group applies to every subscription/RG/resource beneath it. Designing the tree well is governance leverage.</div>
+<pre class="cmd"><span class="c"># Query every public-IP across the whole estate in one shot</span>
+<span class="k">az</span> graph query -q "Resources | where type=='microsoft.network/publicipaddresses'"</pre>
+
+<!-- 4 -->
+<h2 id="identity"><span class="num">4</span>Identity &amp; access — Microsoft Entra</h2>
+<p>In the cloud, <b>identity is the perimeter.</b> This is the most important security domain.</p>
+<ul>
+  <li><b>Microsoft Entra ID</b> — the identity provider: users, groups, app registrations, service principals, SSO, MFA.</li>
+  <li><b>RBAC</b> — role assignments (scope + role + principal). Built-in roles (Owner/Contributor/Reader) plus custom roles. Least privilege is the rule.</li>
+  <li><b>Managed Identity</b> — an Entra identity for a resource so it calls other services <b>without storing secrets</b>. System-assigned (tied to one resource) vs user-assigned (shared). The modern default.</li>
+  <li><b>Conditional Access</b> — policy engine: “require MFA from untrusted networks”, “block legacy auth”. The Zero-Trust enforcement point.</li>
+  <li><b>Privileged Identity Management (PIM)</b> — just-in-time, time-boxed elevation for admin roles with approval/audit.</li>
+  <li><b>Entra External ID / B2B / B2C</b> — collaborate with partners and authenticate customers.</li>
+</ul>
+<div class="sig"><b>Expert signal:</b> “No secrets in code or config.” App gets a <b>managed identity</b> → assigned an RBAC role on SQL/Storage/Key Vault → authenticates with a token, never a password. Combine with <b>PIM</b> for admins and <b>Conditional Access</b> for users and you’ve described a Zero-Trust identity posture.</div>
+<pre class="cmd"><span class="c"># Give a web app a managed identity and grant it read on a Key Vault</span>
+<span class="k">az</span> webapp identity assign -g rg-app -n my-app
+<span class="k">az</span> role assignment create --assignee &lt;app-principal&gt; \
+   --role "Key Vault Secrets User" --scope &lt;keyvault-id&gt;</pre>
+
+<!-- 5 -->
+<h2 id="compute"><span class="num">5</span>The compute spectrum</h2>
+<p>Know the full ladder and the one-line reason to choose each:</p>
+<table>
+  <tr><th>Service</th><th>Choose when</th></tr>
+  <tr><td><b>Virtual Machines</b></td><td>Full OS control / lift-and-shift / specialised software.</td></tr>
+  <tr><td><b>VM Scale Sets (VMSS)</b></td><td>Identical VMs that autoscale behind a load balancer.</td></tr>
+  <tr><td><b>App Service</b></td><td>Managed web apps/APIs — slots, autoscale, SSL, no servers.</td></tr>
+  <tr><td><b>Azure Functions</b></td><td>Event-driven/serverless; pay-per-execution; scale to zero.</td></tr>
+  <tr><td><b>Container Apps</b></td><td>Serverless containers + microservices (Dapr, KEDA scaling) without managing K8s.</td></tr>
+  <tr><td><b>Azure Kubernetes Service (AKS)</b></td><td>Full Kubernetes for complex, portable, multi-service platforms.</td></tr>
+  <tr><td><b>Container Instances (ACI)</b></td><td>A single quick container, burst, or build agent.</td></tr>
+  <tr><td><b>Azure Batch</b></td><td>Large-scale parallel/HPC batch jobs.</td></tr>
+  <tr><td><b>Service Fabric</b></td><td>Legacy stateful microservice platform (maintenance).</td></tr>
+</table>
+<div class="concept"><b>The serverless idea:</b> you stop paying for idle. Functions and Container Apps can <b>scale to zero</b> and bill per request/second — ideal for spiky or unpredictable load, the opposite of a reserved VM you pay for 24/7.</div>
+<div class="warn"><b>.NET Functions clock-facts (verified Jul 2026):</b> the <b>in-process model's support ends 2026-11-10</b> — the <b>isolated worker model</b> is the only .NET path forward (and the only one supporting .NET 10 and Flex). <b>Flex Consumption</b> is now the recommended serverless plan: VNet integration, per-function scaling to ~1000 instances, always-ready instances to defeat cold starts. Functions runtime 1.x retires 2026-09-14. Details: Module 04.</div>
+<pre class="cmd"><span class="c"># A serverless container service that scales 0→N on HTTP load</span>
+<span class="k">az</span> containerapp create -g rg -n api --image myacr.azurecr.io/api:1.0 \
+   --min-replicas 0 --max-replicas 20 --ingress external --target-port 8080</pre>
+
+<!-- 6 -->
+<h2 id="containers"><span class="num">6</span>Containers &amp; orchestration</h2>
+<ul>
+  <li><b>Azure Container Registry (ACR)</b> — private image registry; supports tasks, geo-replication, and content trust.</li>
+  <li><b>AKS</b> — managed Kubernetes control plane (free) + your worker node pools. You own deployments, services, ingress, scaling (HPA/KEDA), and upgrades.</li>
+  <li><b>Container Apps</b> — opinionated, serverless abstraction over Kubernetes/KEDA; great when you want containers without cluster ops.</li>
+  <li><b>Dapr</b> — sidecar runtime for service-to-service calls, state, and pub/sub, portable across Container Apps and AKS.</li>
+</ul>
+<div class="sig"><b>Expert signal:</b> Be able to say <em>when not to use Kubernetes.</em> AKS is powerful but it’s an operational commitment (upgrades, node patching, networking, RBAC). For a handful of services, Container Apps or App Service deliver 80% of the value with a fraction of the ops burden.</div>
+<pre class="cmd"><span class="k">az</span> aks create -g rg -n cluster --node-count 3 --enable-managed-identity --generate-ssh-keys
+<span class="k">az</span> aks get-credentials -g rg -n cluster   <span class="c"># then kubectl, via AI</span></pre>
+
+<!-- 7 -->
+<h2 id="network"><span class="num">7</span>Networking — the expert differentiator</h2>
+<p>Strong networking knowledge is what separates a senior cloud engineer from an app developer who deploys.</p>
+<ul>
+  <li><b>VNet &amp; Subnets</b> — private address space; segment tiers and services.</li>
+  <li><b>NSG / Application Security Groups</b> — stateful firewall rules; ASGs let you write rules against app roles instead of IPs.</li>
+  <li><b>VNet Peering &amp; Hub-Spoke</b> — connect VNets; centralise shared services (firewall, DNS, gateways) in a hub.</li>
+  <li><b>Load balancing ladder</b> — <b>Load Balancer</b> (L4 regional) → <b>Application Gateway</b> (L7 + WAF, regional) → <b>Front Door</b> (global L7 + CDN + WAF) → <b>Traffic Manager</b> (DNS-based global routing).</li>
+  <li><b>Private Link / Private Endpoint</b> — bring PaaS services (SQL, Storage) into your VNet with a private IP; remove public exposure.</li>
+  <li><b>Azure Firewall &amp; DDoS Protection</b> — managed, scalable network security; central egress control.</li>
+  <li><b>Azure Bastion</b> — browser-based RDP/SSH with no public VM IPs.</li>
+  <li><b>Hybrid</b> — <b>VPN Gateway</b> (encrypted over internet) vs <b>ExpressRoute</b> (private dedicated circuit).</li>
+  <li><b>DNS</b> — public Azure DNS + Private DNS Zones (essential for private endpoints).</li>
+</ul>
+<div class="concept"><b>The hub-spoke pattern</b> is the reference enterprise topology: a central <em>hub</em> VNet holds shared firewall, DNS and the on-prem gateway; <em>spoke</em> VNets hold workloads and peer to the hub. Know this diagram cold.</div>
+<pre class="cmd"><span class="c"># Make a SQL server reachable only privately</span>
+<span class="k">az</span> network private-endpoint create -g rg -n pe-sql --vnet-name vnet --subnet data \
+   --private-connection-resource-id &lt;sql-id&gt; --group-id sqlServer --connection-name c1</pre>
+
+<!-- 8 -->
+<h2 id="storage"><span class="num">8</span>Storage</h2>
+<ul>
+  <li><b>Storage Account</b> bundles four services: <b>Blob</b> (objects), <b>File</b> (SMB/NFS shares), <b>Queue</b> (basic messaging), <b>Table</b> (key-value NoSQL).</li>
+  <li><b>Blob access tiers</b> — Hot / Cool / Cold / Archive trade price for retrieval latency; the newer <b>Smart tier</b> auto-moves blobs between hot/cool/cold by usage, and lifecycle policies move data automatically.</li>
+  <li><b>Data Lake Storage Gen2</b> — Blob + hierarchical namespace for analytics.</li>
+  <li><b>Managed Disks</b> — VM block storage (Standard HDD → Premium/Ultra SSD).</li>
+  <li><b>Redundancy</b> — <b>LRS</b> (3 copies, 1 DC) → <b>ZRS</b> (across zones) → <b>GRS/GZRS</b> (across regions). Pick by RPO and compliance.</li>
+  <li><b>Access</b> — keys, SAS tokens, or (best) <b>Entra + managed identity</b>; encryption at rest is on by default.</li>
+</ul>
+<div class="sig"><b>Expert signal:</b> Match <b>redundancy tier to the recovery objective</b> and <b>access tier to the data’s temperature</b> — then automate tier transitions with lifecycle rules. That’s cost-aware design, not just “put it in Blob.”</div>
+
+<!-- 9 -->
+<h2 id="data"><span class="num">9</span>Databases</h2>
+<table>
+  <tr><th>Service</th><th>Best for</th></tr>
+  <tr><td><b>Azure SQL Database</b></td><td>Managed single relational DB; serverless &amp; elastic pools; hyperscale.</td></tr>
+  <tr><td><b>SQL Managed Instance</b></td><td>Near-full SQL Server surface for lift &amp; shift.</td></tr>
+  <tr><td><b>Cosmos DB</b></td><td>Global, multi-model, single-digit-ms NoSQL; choose the consistency level.</td></tr>
+  <tr><td><b>Azure DB for PostgreSQL / MySQL</b></td><td>Managed open-source relational.</td></tr>
+  <tr><td><b>Azure Cache for Redis</b></td><td>In-memory cache / session / pub-sub.</td></tr>
+  <tr><td><b>Synapse / Fabric Warehouse</b></td><td>Analytical (OLAP) workloads at scale.</td></tr>
+</table>
+<div class="concept"><b>Cosmos DB consistency spectrum</b> — Strong → Bounded Staleness → Session → Consistent Prefix → Eventual. It’s the cleanest real-world illustration of the <b>CAP / PACELC theorem</b> (Microsoft’s own docs cite PACELC): you trade consistency for latency/availability, explicitly. Being able to explain this is a senior marker.</div>
+<div class="concept"><b>OLTP vs OLAP</b> — transactional databases (SQL, Cosmos) serve the app; analytical stores (Synapse, Fabric, Data Lake) serve reporting/ML. Don’t run heavy analytics on your OLTP store — separate them.</div>
+
+<!-- 10 -->
+<h2 id="analytics"><span class="num">10</span>Data &amp; analytics</h2>
+<ul>
+  <li><b>Microsoft Fabric</b> — the unified SaaS analytics platform (OneLake lake, warehouse, Data Factory, Power BI) — the strategic direction for analytics.</li>
+  <li><b>Azure Synapse Analytics</b> — integrated big-data + warehousing (SQL pools, Spark).</li>
+  <li><b>Azure Data Factory</b> — managed ETL/ELT orchestration and data movement.</li>
+  <li><b>Azure Databricks</b> — Spark-based analytics &amp; ML at scale.</li>
+  <li><b>Event Hubs</b> — high-throughput streaming ingestion (millions of events/sec).</li>
+  <li><b>Stream Analytics</b> — real-time SQL-like processing over streams.</li>
+  <li><b>Data Lake</b> — the cheap, scalable landing zone for raw data.</li>
+</ul>
+<div class="sig"><b>Expert signal:</b> Sketch the canonical pipeline — <b>ingest (Event Hubs/Data Factory) → store (Data Lake/OneLake) → process (Databricks/Synapse/Stream Analytics) → serve (Warehouse/Power BI)</b> — and name where governance and lineage live. Architecture over tooling.</div>
+
+<!-- 11 -->
+<h2 id="integration"><span class="num">11</span>Messaging &amp; integration</h2>
+<p>Knowing <em>which</em> messaging primitive to use is a classic interview discriminator:</p>
+<table>
+  <tr><th>Service</th><th>Use for</th></tr>
+  <tr><td><b>Service Bus</b></td><td>Enterprise messaging — queues &amp; topics, ordering, transactions, dead-letter. Commands/work.</td></tr>
+  <tr><td><b>Event Grid</b></td><td>Reactive, discrete <em>event</em> notifications (pub/sub) with near-real-time delivery.</td></tr>
+  <tr><td><b>Event Hubs</b></td><td>High-volume telemetry/event <em>streaming</em> &amp; analytics ingestion.</td></tr>
+  <tr><td><b>Storage Queues</b></td><td>Simple, cheap, large queues without enterprise features.</td></tr>
+  <tr><td><b>Logic Apps</b></td><td>Low-code workflow/integration across 1000+ connectors.</td></tr>
+  <tr><td><b>API Management (APIM)</b></td><td>Gateway for your APIs — auth, throttling, versioning, a developer portal.</td></tr>
+</table>
+<div class="concept"><b>The one-liner that proves you get it:</b> “<b>Event</b> = something happened (Event Grid/Hubs); <b>Message</b> = please do something (Service Bus). Events are facts; messages carry intent.” Plus: messaging enables <b>loose coupling</b> and <b>resilience</b> — producers and consumers scale and fail independently.</div>
+
+<!-- 12 -->
+<h2 id="ai"><span class="num">12</span>AI &amp; machine learning</h2>
+<ul>
+  <li><b>Microsoft Foundry</b> (the rebrand of Azure AI Studio / Azure AI Foundry) — the unified PaaS for building, deploying and governing generative-AI apps and <b>agents</b>; Azure OpenAI is now a Foundry resource, and the old Azure AI Services are surfaced as <b>“Foundry Tools.”</b> One resource, unified RBAC/networking/policy, built-in tracing &amp; evaluations.</li>
+  <li><b>Azure OpenAI (in Foundry)</b> — enterprise-governed access to frontier LLMs (GPT-4o, o-series, etc.) with private networking and content filtering.</li>
+  <li><b>Foundry Tools / Azure AI Services</b> — pre-built APIs: vision, speech, language, document intelligence, translation.</li>
+  <li><b>Azure AI Search</b> — vector + keyword retrieval; the backbone of <b>RAG</b> (retrieval-augmented generation).</li>
+  <li><b>Azure Machine Learning</b> — full MLOps: train, register, deploy, monitor custom models.</li>
+</ul>
+<div class="sig"><b>Expert signal:</b> Describe a governed <b>RAG pattern on Azure</b> — data in Blob/Data Lake → embeddings indexed in AI Search → an Azure OpenAI model grounded on retrieved chunks → exposed through APIM with managed-identity auth and Application Insights tracing. That single answer ties AI to security, networking, and observability at once.</div>
+
+<!-- 13 -->
+<h2 id="security"><span class="num">13</span>Security &amp; Zero Trust</h2>
+<ul>
+  <li><b>Zero Trust</b> — “never trust, always verify.” Verify explicitly, least privilege, assume breach. The governing mindset.</li>
+  <li><b>Microsoft Defender for Cloud</b> — posture management (Secure Score) + workload threat protection (CSPM/CWPP).</li>
+  <li><b>Microsoft Sentinel</b> — cloud-native SIEM/SOAR for detection, hunting, and automated response.</li>
+  <li><b>Key Vault</b> — secrets, keys, certificates; with HSM-backed tiers and rotation.</li>
+  <li><b>Encryption</b> — at rest (platform-managed or customer-managed keys) and in transit (TLS); confidential computing for in-use.</li>
+  <li><b>Network security</b> — WAF (on App Gateway/Front Door), DDoS Protection, Azure Firewall, Private Link to remove public surface.</li>
+</ul>
+<div class="concept"><b>Defense in depth</b> — layer controls (identity → network → host → app → data) so no single failure is fatal. Pair with <b>least privilege</b> and <b>assume-breach</b> and you can articulate any security review.</div>
+
+<!-- 14 -->
+<h2 id="governance"><span class="num">14</span>Governance &amp; cost management</h2>
+<ul>
+  <li><b>Azure Policy</b> — enforce/audit rules (allowed regions, required tags, enforced encryption); deploy-if-not-exists remediation.</li>
+  <li><b>Landing Zones</b> — governed, repeatable foundations (the CAF “Ready” phase) workloads deploy into.</li>
+  <li><b>Cost Management + Budgets</b> — analyse, allocate (by tag), and alert on spend.</li>
+  <li><b>Azure Advisor</b> — automated recommendations across cost, security, reliability, performance.</li>
+  <li><b>Pricing levers</b> — Pay-as-you-go, <b>Reservations</b>, <b>Savings Plans</b>, <b>Spot</b>, and <b>Azure Hybrid Benefit</b> (reuse Windows/SQL licences).</li>
+</ul>
+<div class="sig"><b>Expert signal — FinOps:</b> cost is a continuous engineering discipline, not a monthly surprise. “Right-size from telemetry, reserve the steady-state baseline, burst on consumption, apply Hybrid Benefit, and allocate every cost with tags” is a complete cost-governance answer.</div>
+<pre class="cmd"><span class="k">az</span> policy assignment create --name 'require-tag-env' \
+   --policy &lt;require-tag-policy-id&gt; --scope &lt;mg-or-sub-id&gt;</pre>
+
+<!-- 15 -->
+<h2 id="iac"><span class="num">15</span>Infrastructure as Code &amp; DevOps</h2>
+<ul>
+  <li><b>Bicep</b> — Azure-native declarative IaC (compiles to ARM). The first language to master.</li>
+  <li><b>ARM templates</b> — the underlying JSON; read, rarely hand-write.</li>
+  <li><b>Terraform</b> — multi-cloud declarative IaC; common in larger orgs.</li>
+  <li><b>CI/CD</b> — GitHub Actions / Azure DevOps Pipelines build, test, and deploy both app and infra — authenticated via <b>workload identity federation (OIDC)</b>, so pipelines hold <em>zero stored credentials</em>.</li>
+  <li><b>Patterns</b> — environments (dev→test→prod), App Service deployment <b>slots</b> / Container Apps <b>revision weights</b> for blue-green &amp; canary, feature flags (App Configuration) to decouple release from deploy, policy-gated deployments, <b>deployment stacks</b> for drift-denial and clean teardown.</li>
+  <li><b>Aspire + azd</b> — for .NET distributed apps: Aspire models the system in C# (local orchestration, dashboard, OTel defaults); <code>azd up</code> provisions and deploys it to Container Apps or App Service. The fastest laptop→Azure path that still yields sane infrastructure.</li>
+</ul>
+<div class="concept"><b>Declarative vs imperative</b> — IaC describes the <em>desired state</em>; the engine reconciles reality to it (idempotent). That’s why portal-clicking doesn’t scale and IaC does: it’s reviewable, repeatable, and auditable.</div>
+<pre class="cmd"><span class="c"># Deploy a whole environment from a declarative file (AI runs it)</span>
+<span class="k">az</span> deployment group create -g rg --template-file main.bicep --parameters env=prod</pre>
+
+<!-- 16 -->
+<h2 id="observability"><span class="num">16</span>Observability</h2>
+<ul>
+  <li><b>Azure Monitor</b> — the umbrella for metrics, logs, traces, alerts.</li>
+  <li><b>Application Insights</b> — APM: requests, dependencies, exceptions, distributed tracing, live metrics.</li>
+  <li><b>Log Analytics + KQL</b> — central log store queried with Kusto Query Language (learn KQL — it’s the lingua franca of Azure ops).</li>
+  <li><b>Alerts + Action Groups</b> — condition → notify/automate/auto-heal.</li>
+  <li><b>Workbooks &amp; Dashboards</b> — shared operational and exec views.</li>
+</ul>
+<div class="concept"><b>The three pillars of observability</b> — metrics (what), logs (why), traces (where) — let you answer “is it healthy, and if not, where’s the fault?” Tie this to the SLA: you cannot promise availability you cannot measure.</div>
+
+<!-- 17 -->
+<h2 id="reliability"><span class="num">17</span>Reliability &amp; disaster recovery</h2>
+<ul>
+  <li><b>Availability Zones</b> for datacenter-fault tolerance; <b>multi-region</b> for region-fault tolerance.</li>
+  <li><b>RTO / RPO</b> — the two numbers that define every DR design; ask the business for them first.</li>
+  <li><b>Composite SLA</b> — chaining services <em>multiplies</em> their SLAs (two 99.9% services in series ≈ 99.8%). Redundancy raises it back. Be able to do this maths.</li>
+  <li><b>Azure Site Recovery / Backup</b> — VM failover and point-in-time restore.</li>
+  <li><b>Patterns</b> — active-active vs active-passive; retry with backoff, circuit breaker, bulkhead, health probes.</li>
+  <li><b>Chaos Studio</b> — fault injection to prove resilience.</li>
+</ul>
+<div class="warn"><b>Trade-off to verbalise:</b> every additional “nine” multiplies cost and complexity. Design to the business’s stated SLA — no more, no less. Over-engineering resilience is as much a failure as under-engineering it.</div>
+
+<!-- 18 -->
+<h2 id="frameworks"><span class="num">18</span>The two frameworks that tie it together</h2>
+<p><b>Well-Architected Framework (WAF)</b> — judge any single workload across five pillars: <b>Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency.</b></p>
+<p><b>Cloud Adoption Framework (CAF)</b> — the org-level journey: <b>Strategy → Plan → Ready → Adopt → Govern → Manage.</b></p>
+<div class="sig"><b>Expert signal:</b> Use WAF as a checklist for every design review and CAF as the narrative for every transformation. Naming the right framework for the right altitude (one workload vs the whole org) instantly reads as senior.</div>
+
+<!-- 19 -->
+<h2 id="prove"><span class="num">19</span>Proving expertise to an employer</h2>
+<ul>
+  <li><b>Certifications as proof-of-breadth</b> — <b>AZ-900</b> (fundamentals) → <b>AZ-104</b> (administrator) → role specialisations: <b>AZ-204</b> (developer), <b>AZ-305</b> (solutions architect — the gold standard for design; it has <b>AZ-104 as a prerequisite</b> and a 700 pass score), <b>AZ-500</b> (security), <b>AZ-700</b> (networking), <b>DP-203</b> (data), <b>AI-102</b> (AI engineer). AZ-305 is the one that signals architecture judgement.</li>
+  <li><b>Speak in trade-offs, not features.</b> “I’d use X because Y, accepting trade-off Z, mitigated by W.” Every section above is written to feed that sentence.</li>
+  <li><b>Always close the loop on five things</b> in any design: identity (managed identity, least privilege), networking (private, segmented), reliability (zones, SLA, DR), observability (monitor + alerts), and cost (right-size, reserve, tag).</li>
+  <li><b>Have one reference architecture ready</b> — e.g. a web app: App Service (zone-redundant) → SQL (private endpoint) → Key Vault + managed identity → Front Door + WAF → App Insights → Bicep + CI/CD → reserved + Hybrid Benefit. If you can defend one end-to-end design across all five pillars, you can defend any.</li>
+</ul>
+
+<div class="sig"><b>The mindset, in one line:</b> An Azure expert isn’t someone who remembers commands — it’s someone who, given a business problem and its constraints, can choose the right services, justify the trade-offs across the five pillars, and hand the exact execution to automation (or an AI) with confidence that the design is sound.</div>
+
+<footer>
+  A concept-mastery map for demonstrating full-platform Azure understanding — the breadth layer of the
+  <a href="index.html">Azure Expert Curriculum</a> (12 deep modules, labs, and assessments live alongside this file).
+  Commands shown for documentation only; execution is delegated to AI. Product names current as of 2026 —
+  Microsoft renames/reorganises services frequently (e.g. Azure AD → Microsoft Entra ID; Azure AI Studio / AI
+  Foundry → Microsoft Foundry; analytics → Microsoft Fabric). Verified against Microsoft Learn, July 2026.
+  Verify exact capabilities, SKUs, limits and pricing against Microsoft Learn before committing to a design.
+  <a class="back" href="#">↑ Back to top</a>
+</footer>
+
+</div>
+</body>
+</html>

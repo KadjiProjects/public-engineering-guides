@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Expert Curriculum — for the experienced .NET developer</title>
+<style>
+  :root{
+    --ink:#1b2330; --muted:#5c6675; --line:#e3e7ec; --accent:#0a5ca8;
+    --accent-soft:#e9f1f9; --sig:#1f7a4d; --sig-bg:#e9f7ef;
+    --warn-bg:#fff6e6; --warn-line:#d99b2b; --dark:#0f1b2a;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink); line-height:1.62; margin:0; background:#fbfcfd;}
+  .wrap{max-width:1020px; margin:0 auto; padding:40px 26px 110px;}
+  header{border-bottom:3px solid var(--accent); padding-bottom:18px;}
+  h1{font-size:1.9rem; margin:0 0 6px; line-height:1.2;}
+  .sub{color:var(--muted); font-size:1rem;}
+  h2{font-size:1.35rem; margin-top:46px; padding:8px 0 6px;
+     border-bottom:2px solid var(--accent-soft); color:var(--accent);}
+  h3{font-size:1.08rem; margin-top:24px; color:#16263a;}
+  p{margin:11px 0;} ul,ol{margin:10px 0; padding-left:22px;} li{margin:6px 0;}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:.92rem;}
+  th,td{border:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top;}
+  th{background:var(--accent-soft);} tr:nth-child(even) td{background:#f7f9fb;}
+  a{color:var(--accent);}
+  code{background:#eef1f4; padding:1px 6px; border-radius:4px; font-size:.9em;
+       font-family:"Cascadia Code",Consolas,monospace;}
+  .banner{background:#13507e; color:#fff; border-radius:10px; padding:18px 22px;
+          margin:22px 0; font-size:.97rem;}
+  .banner b{color:#ffd479;}
+  .sig{border-left:4px solid var(--sig); background:var(--sig-bg); padding:11px 15px;
+       margin:14px 0; border-radius:0 7px 7px 0;} .sig b{color:var(--sig);}
+  .warn{border-left:4px solid var(--warn-line); background:var(--warn-bg); padding:11px 15px;
+        margin:14px 0; border-radius:0 7px 7px 0;} .warn b{color:#b9791a;}
+  .cardgrid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:18px 0;}
+  @media(max-width:720px){.cardgrid{grid-template-columns:1fr;}}
+  .mcard{border:1px solid var(--line); border-radius:10px; padding:14px 18px; background:#fff;}
+  .mcard h4{margin:0 0 6px; font-size:1rem;}
+  .mcard h4 a{text-decoration:none;}
+  .mcard p{margin:4px 0 0; font-size:.87rem; color:var(--muted);}
+  .mcard .wk{display:inline-block; font-size:.7rem; font-weight:700; color:#fff;
+             background:var(--accent); border-radius:12px; padding:1px 9px; margin-bottom:6px;}
+  footer{margin-top:54px; padding-top:16px; border-top:1px solid var(--line);
+         color:var(--muted); font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Azure Expert Curriculum</h1>
+  <div class="sub">For an experienced .NET developer becoming an <b>expert at developing, deploying, and configuring Azure services</b>. Everything in this folder is one system: deep modules to build understanding, hands-on labs to build skill, and drill/recall documents to make it permanent.</div>
+</header>
+
+<div class="banner">
+  <b>What "expert" means here — and how this curriculum gets you there.</b><br>
+  An Azure expert is someone who, given a business problem and its constraints, chooses the right
+  services, justifies the trade-offs across reliability, security, cost, operations and performance,
+  builds it with production-grade code and IaC, and can prove the system is healthy. That is four
+  capabilities — <b>judgment, depth, hands-on skill, and recall</b> — and each document type in this
+  folder trains exactly one of them.
+</div>
+
+<h2>1 · How to learn from this folder (read this first)</h2>
+<p>This curriculum uses four evidence-based techniques. They are not optional decoration — they are why the material is organized the way it is:</p>
+<table>
+  <tr><th>Technique</th><th>What it is</th><th>Where it lives here</th></tr>
+  <tr><td><b>Active recall</b></td><td>Retrieving from memory beats re-reading, by a wide margin. Test yourself <em>before</em> you feel ready.</td><td><a href="azure-flashcards.html">Flashcards</a> after every module; self-check questions at each module's end.</td></tr>
+  <tr><td><b>Spaced repetition</b></td><td>Reviewing at growing intervals (1 → 3 → 7 → 21 days) moves knowledge to long-term memory.</td><td>The weekly plan below schedules reviews; the flashcard app tracks "knew it / review again".</td></tr>
+  <tr><td><b>Deliberate practice</b></td><td>Skill comes from doing slightly-too-hard things with feedback, not from watching or reading.</td><td><a href="labs.md">The lab track</a> — one capstone application built progressively across all 12 modules.</td></tr>
+  <tr><td><b>Elaboration (Feynman)</b></td><td>Explaining a concept in your own words exposes what you don't actually understand.</td><td>Each module ends with "explain out loud" prompts; the <a href="assessment.md">assessment</a> has design exercises with model answers.</td></tr>
+</table>
+
+<div class="sig"><b>The weekly rhythm (repeat for each module):</b>
+<b>Day 1–2</b> — read the module actively (pen, not highlighter: write questions in margins).
+<b>Day 3–4</b> — do the module's lab section hands-on in a real Azure subscription.
+<b>Day 5</b> — drill the flashcards for this module + <em>all previous modules marked "review again."</em>
+<b>Day 6</b> — answer the module's self-check from memory, then do one "explain out loud" prompt as if teaching a colleague.
+<b>Day 7</b> — rest, or re-do whatever failed.
+</div>
+
+<div class="warn"><b>Non-negotiable:</b> you need a real Azure subscription (free tier + ~$20–50 of experiments is enough — every lab includes cleanup steps and cost guards). Reading about deployment slots is knowledge; swapping one under live traffic is expertise. The gap between those two is exactly what this curriculum closes.</div>
+
+<h2>2 · The 12-module path (≈12 weeks at 6–8 h/week)</h2>
+<div class="cardgrid">
+  <div class="mcard"><span class="wk">Week 1</span><h4><a href="modules/01-foundations.md">01 · Foundations &amp; the Azure resource model</a></h4><p>Mental models, ARM, hierarchy, governance primitives, the CLI/tooling stack — the grammar everything else is written in.</p></div>
+  <div class="mcard"><span class="wk">Week 2</span><h4><a href="modules/02-identity-security.md">02 · Identity, access &amp; secrets</a></h4><p>Entra ID, RBAC, managed identity, Key Vault — with the exact .NET code (<code>DefaultAzureCredential</code>) that makes "no secrets" real.</p></div>
+  <div class="mcard"><span class="wk">Week 3</span><h4><a href="modules/03-compute-app-service.md">03 · App Service deep dive</a></h4><p>Plans &amp; SKUs, slots, configuration, scaling, networking integration, deployment — the .NET workhorse, mastered.</p></div>
+  <div class="mcard"><span class="wk">Week 4</span><h4><a href="modules/04-serverless-functions.md">04 · Functions &amp; serverless</a></h4><p>Isolated worker model, triggers/bindings, hosting plans (Flex Consumption!), Durable Functions, cold starts.</p></div>
+  <div class="mcard"><span class="wk">Week 5</span><h4><a href="modules/05-containers.md">05 · Containers: ACR → Container Apps → AKS</a></h4><p>Images, registries, Container Apps (revisions, KEDA, Dapr), when AKS, and Aspire for local orchestration.</p></div>
+  <div class="mcard"><span class="wk">Week 6</span><h4><a href="modules/06-data-sql.md">06 · Relational data &amp; caching</a></h4><p>Azure SQL tiers &amp; purchasing models, EF Core in the cloud, connection resilience, Redis and cache patterns.</p></div>
+  <div class="mcard"><span class="wk">Week 7</span><h4><a href="modules/07-data-cosmos-storage.md">07 · Cosmos DB &amp; storage</a></h4><p>Partitioning, RU/s, consistency levels in practice, the .NET SDK done right; Blob storage patterns and SAS vs identity.</p></div>
+  <div class="mcard"><span class="wk">Week 8</span><h4><a href="modules/08-messaging.md">08 · Messaging &amp; eventing</a></h4><p>Service Bus (sessions, DLQ, dedup), Event Grid, Event Hubs — and the .NET consumer patterns that survive production.</p></div>
+  <div class="mcard"><span class="wk">Week 9</span><h4><a href="modules/09-networking.md">09 · Networking</a></h4><p>VNets, private endpoints + the DNS mechanics everyone gets wrong, the load-balancing ladder, hub-spoke, App Service/Functions network integration.</p></div>
+  <div class="mcard"><span class="wk">Week 10</span><h4><a href="modules/10-observability.md">10 · Observability</a></h4><p>App Insights + OpenTelemetry in .NET, a working KQL tutorial, alerts, dashboards, SLOs — prove health, don't assert it.</p></div>
+  <div class="mcard"><span class="wk">Week 11</span><h4><a href="modules/11-iac-devops.md">11 · IaC &amp; delivery</a></h4><p>Bicep from zero to modules, GitHub Actions with OIDC (no deploy secrets), environments, blue-green/canary, azd.</p></div>
+  <div class="mcard"><span class="wk">Week 12</span><h4><a href="modules/12-architecture.md">12 · Architecture, reliability &amp; cost</a></h4><p>Well-Architected in practice, resilience patterns, DR &amp; SLA math, FinOps, and defending a reference architecture end-to-end.</p></div>
+</div>
+
+<h2>3 · The document map — what each file is for</h2>
+<table>
+  <tr><th>Document</th><th>Trains</th><th>Use it when</th></tr>
+  <tr><td><b>modules/01–12</b> (this curriculum's core)</td><td>Depth</td><td>Primary study, one per week. Each: concepts → .NET code → decision framework → lab → self-check.</td></tr>
+  <tr><td><a href="labs.md"><b>labs.md</b></a></td><td>Hands-on skill</td><td>Days 3–4 each week. One capstone app ("CloudBoard") grows across all modules.</td></tr>
+  <tr><td><a href="assessment.md"><b>assessment.md</b></a></td><td>Judgment</td><td>Milestone gates after modules 4, 8, 12 — design exercises with model answers.</td></tr>
+  <tr><td><a href="azure-expertise-concepts-map.html"><b>Concepts Map</b></a></td><td>Breadth / big picture</td><td>Read once before module 1; revisit monthly. The 30,000-ft map the modules zoom into.</td></tr>
+  <tr><td><a href="azure-flashcards.html"><b>Flashcards</b></a></td><td>Recall</td><td>Day 5 each week + any spare 10 minutes. Filter by category to match your current module.</td></tr>
+  <tr><td><a href="azure-interview-cram-sheet.html"><b>Cram Sheet</b></a></td><td>Recall (condensed)</td><td>Before any interview/design review; also a weekly 5-minute skim.</td></tr>
+  <tr><td><a href="azure-migration-knowledge-map.html"><b>Migration Knowledge Map</b></a></td><td>Applied judgment</td><td>Read alongside module 12; it's the "apply everything to a legacy estate" scenario.</td></tr>
+</table>
+
+<h2>4 · Milestones — how you know you're progressing</h2>
+<table>
+  <tr><th>Gate</th><th>After</th><th>You can…</th></tr>
+  <tr><td><b>M1 — Builder</b></td><td>Module 4</td><td>Deploy a secured .NET API + Functions worker with managed identity, no secrets anywhere, and explain every resource it created. (Assessment part A.)</td></tr>
+  <tr><td><b>M2 — Engineer</b></td><td>Module 8</td><td>Design and build an event-driven, multi-service system with the right data stores and messaging primitives, and justify each choice. (Assessment part B.)</td></tr>
+  <tr><td><b>M3 — Expert</b></td><td>Module 12</td><td>Take a business scenario cold and produce a defensible architecture + working Bicep + observability + cost model; pass the mock design review. (Assessment part C.) Then AZ-204 and AZ-305 exams are consolidation, not stretch.</td></tr>
+</table>
+
+<div class="sig"><b>Certification mapping (proof, not the goal):</b> modules 1–8 ≈ AZ-204 (Developer). Modules 1–12 + the migration map ≈ AZ-305 content (with AZ-104 admin gaps to fill: mostly VM ops and AD Connect). Book AZ-204 after M2 while momentum is high.</div>
+
+<h2>5 · Keeping it current</h2>
+<p>Azure changes monthly; this folder is verified against Microsoft Learn as of <b>July 2026</b>. Every module ends with a short <b>"verify before you build"</b> list of the facts most likely to drift (SKUs, limits, previews, retirements). Two standing rules:</p>
+<ul>
+  <li>Before committing to any design, check exact limits/pricing on <a href="https://learn.microsoft.com">Microsoft Learn</a> and <a href="https://azure.microsoft.com/updates">Azure Updates</a>.</li>
+  <li>Known clock-driven facts baked into this material: Functions <b>in-process model support ends 2026-11-10</b> (isolated worker is the only .NET path forward); Functions runtime 1.x ends 2026-09-14; <b>Flex Consumption</b> is the recommended serverless plan; Aspire is the local-orchestration + deployment story for .NET distributed apps; the AI platform is <b>Microsoft Foundry</b> (Azure OpenAI is a Foundry resource).</li>
+</ul>
+
+<footer>
+  Azure Expert Curriculum · assembled July 2026 for an experienced .NET developer · companion documents
+  verified against Microsoft Learn · start with <a href="modules/01-foundations.md">Module 01</a> after
+  reading the <a href="azure-expertise-concepts-map.html">Concepts Map</a> once.
+</footer>
+
+</div>
+</body>
+</html>
