@@ -54,6 +54,24 @@ included as compilable files here because they depend on RecoAPI's private domai
 persistence model types. Copy `src/RECO.Mapping/` as-is into your own fork (it has zero
 package dependencies), then write one mapping partial per entity following §4.
 
+## Using AutoMapper removal on a *different* project (not RecoAPI)
+
+Everything above is specific to the RecoAPI codebase. If you have a **different**
+project that uses AutoMapper and just want it gone — independent of any .NET 10 upgrade
+— use the separate, generic, self-contained guide instead:
+
+📁 **[automapper-removal-guide/](automapper-removal-guide/)** — applies to any .NET
+project, any target framework (with a documented fallback for pre-C#11/.NET 7 codebases
+that can't use static abstract interfaces), and covers the *entire* AutoMapper surface:
+simple maps, ignored members, custom value resolvers (with and without DI dependencies),
+`ReverseMap`, in-place updates, nested/collection mapping, automatic member-name
+flattening, `ProjectTo<T>()` LINQ projections, inheritance mapping, and reference-cycle
+handling — with a numbered pattern catalog giving the exact replacement code for each.
+
+It does not touch or depend on anything RecoAPI-specific; it's a standalone document set
+that happens to live in this repository because it shares the same underlying library
+(`src/RECO.Mapping/`, described next).
+
 ## How to execute (instructions for the LLM)
 
 1. Read [00-ground-rules.md](00-ground-rules.md) **completely** before touching

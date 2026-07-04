@@ -1,0 +1,21 @@
+> **AutoMapper → RECO.Mapping generic migration guide — part 8 of 9.**
+> Previous: [Verification](06-verification.md) · Next: [Final checklist](08-final-checklist.md)
+
+## 7. Troubleshooting — error → cause → fix
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `CS8920`/`CS8929`/"static abstract members require C# 11 or greater" | Interface tier used on a target framework/SDK below the requirement | Switch that project to the fallback tier — [02-add-the-library.md](02-add-the-library.md) §2.3 |
+| `CS0311: cannot be used as type parameter 'TDbModel'` on a generic pipeline class | The class is constrained on an interface (`IDualMapped<...>`, etc.) but a type used with it doesn't implement it | Either implement the interface on that type, or convert that pipeline to the delegate-based fallback — [04-rewrite-call-sites.md](04-rewrite-call-sites.md) §4.3 |
+| `CS0535: does not implement interface member 'MapFrom'` | Signature mismatch — must be exactly `public static TSelf MapFrom(TSource source)` | Match the interface's exact static-abstract signature |
+| `MappingVerificationException: 'X' was not populated` | A property assignment was missed, or `X` is actually a flattened member (§3.14) needing an explicit nested-path expression | Recheck the property against the source type's structure; add the missing assignment |
+| `MappingVerificationException: 'X' is declared unmapped-by-design but received the source value` | Either `X` shouldn't be in the `unmappedByDesign` list (it should be mapped), or it's being accidentally assigned somewhere despite being ignored | Cross-check against your §3.2 ignore-list record for this pair; fix whichever side is wrong |
+| Runtime data is wrong for a specific property, but build succeeded and the verifier test passed | The property is covered by *some* expression, but not the *correct* one — the verifier only proves "not left at default," not "matches the old value" | Compare against the original `Profile`'s exact `ForMember`/flattening logic for that property; write (or run) a characterization test against the OLD AutoMapper-based code's output *before* removing it, if you haven't already captured that behavior during discovery |
+| `InvalidOperationException: ... could not be translated` on a query that used to call `.ProjectTo<T>()` | The hand-written `.Select()` replacement (§3.15) calls something the ORM's query provider can't translate to SQL | Keep the projection to pure, provider-translatable expressions only; move anything requiring arbitrary C# execution to after `.ToList()`/`.AsEnumerable()`, accepting the performance tradeoff consciously |
+| EF Core (or another ORM) throws a duplicate-tracking / "entity already tracked" exception after replacing an in-place update | A fresh instance was *constructed* (`MapFrom`) where the code actually needs to *update* an already-tracked instance (`CopyScalarsTo`) | Recheck the call site's original AutoMapper overload — one-argument `Map<T>()` was construction, two-argument `Map(source, existing)` was in-place update; these are not interchangeable — §3.10 |
+| Stack overflow mapping a graph that used to work under AutoMapper | AutoMapper's `PreserveReferences()` was silently protecting a reference cycle the hand-written recursive mapping doesn't guard against | §5.3 — map the back-reference as an ID, or add explicit cycle/depth protection |
+| A concrete derived type's data is missing after switching from `.Include<>()` inheritance mapping | The type-switch dispatch (§5.2) doesn't have a case for that concrete type — it fell through to the base mapping | Add the missing case; consider the reflection-based "every subtype has a case" test from §5.2 |
+| Package removal (`dotnet remove package AutoMapper`) fails with "not found" | The package is referenced transitively (via a shared internal package) rather than directly in this csproj | Find the actual referencing project with `dotnet list package --include-transitive`, remove it there instead |
+| A `Profile` file still has content after all `CreateMap<>()` calls are removed | Something non-AutoMapper-specific was defined in the same file (helper methods, constants) | Keep that content; move it out of the `Profile`-derived class into a plain class before deleting the AutoMapper base type |
+
+---
