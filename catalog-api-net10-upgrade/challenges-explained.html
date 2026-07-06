@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upgrading a plugin-based API from .NET 6 to .NET 10 — the challenges, explained</title>
+<style>
+  :root {
+    --ink: #1a2332; --muted: #5a6a7e; --accent: #0f4c81; --accent-soft: #e8f0f8;
+    --good: #1a7f4e; --bad: #b3382c; --warn: #9a6700;
+    --code-bg: #f6f8fa; --border: #d7dee8; --card: #ffffff; --page: #f2f5f9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--ink); background: var(--page); line-height: 1.65; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+  header.hero { background: linear-gradient(135deg, #0f4c81 0%, #1a2332 100%); color: #fff; padding: 56px 24px 48px; }
+  .hero-inner { max-width: 960px; margin: 0 auto; }
+  .hero h1 { font-size: 2rem; font-weight: 700; letter-spacing: -.5px; }
+  .hero .sub { margin-top: 10px; font-size: 1.12rem; color: #c8d8ea; max-width: 50em; }
+  .hero .tag { display: inline-block; margin-bottom: 18px; padding: 4px 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: #cfe0f0; }
+  h2 { font-size: 1.5rem; color: var(--accent); margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 2px solid var(--border); letter-spacing: -.3px; }
+  h3 { font-size: 1.1rem; margin: 26px 0 8px; color: var(--ink); }
+  p { margin: 10px 0; }
+  p.lead { font-size: 1.08rem; color: var(--muted); }
+  a { color: var(--accent); }
+  ul, ol { margin: 10px 0 10px 26px; }
+  li { margin: 4px 0; }
+  code { font-family: 'Cascadia Code', Consolas, monospace; font-size: .88em; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+  pre { background: #10161f; color: #d5dde8; border-radius: 10px; padding: 18px 20px; overflow-x: auto; margin: 14px 0; font-size: .84rem; line-height: 1.55; }
+  pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+  pre .cm { color: #7a8a9d; } pre .kw { color: #7cb8ff; } pre .ty { color: #6fd3a8; } pre .st { color: #e8b878; } pre .at { color: #d0a8ff; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; margin: 16px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+  .panel-title { font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .panel-title.before { color: var(--bad); } .panel-title.after { color: var(--good); }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; background: var(--card); border-radius: 8px; overflow: hidden; font-size: .92rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--accent-soft); color: var(--accent); font-size: .82rem; letter-spacing: .05em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  .callout { border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; padding: 12px 18px; margin: 16px 0; }
+  .callout.win { border-color: var(--good); background: #e9f6ef; }
+  .callout.danger { border-color: var(--bad); background: #fbecea; }
+  .callout.warn { border-color: var(--warn); background: #fbf3e0; }
+  ol.steps { counter-reset: step; list-style: none; margin: 14px 0; }
+  ol.steps li { counter-increment: step; position: relative; padding: 0 0 18px 52px; margin: 0; }
+  ol.steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .term { font-weight: 700; color: var(--accent) }
+  nav.toc { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; margin: 28px 0; }
+  nav.toc .panel-title { color: var(--accent); margin-bottom: 10px; }
+  nav.toc ol { counter-reset: toc; list-style: none; margin: 0; }
+  nav.toc li { counter-increment: toc; margin: 6px 0; }
+  nav.toc li::before { content: counter(toc) ". "; color: var(--accent); font-weight: 700; }
+  .foot { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: .88rem; }
+  .overflow { overflow-x: auto; }
+  .pill { display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: .78rem; font-weight: 700; letter-spacing:.04em; }
+  .pill.p1 { background: var(--accent-soft); color: var(--accent); }
+  .pill.p2 { background: #e9f6ef; color: var(--good); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="tag">Upgrade guide · For humans</span>
+    <h1>Upgrading a plugin-based API from .NET 6 to .NET 10</h1>
+    <p class="sub">Every challenge in this migration, explained in plain language for a junior
+    developer — including how to handle hundreds of plugin modules in batch, and the optional
+    second act: replacing AutoMapper with a compile-time mapper. Everything here was verified by
+    doing the upgrade for real on a production system of this shape.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <div class="panel-title">On this page</div>
+  <ol>
+    <li>The system we're upgrading</li>
+    <li>Why upgrade at all — and why it's two separate parts</li>
+    <li>The key areas, at a glance</li>
+    <li>Part 1, challenge by challenge</li>
+    <li>The plugin-module problem: upgrading hundreds of filters &amp; subscribers</li>
+    <li>Part 2: replacing AutoMapper with Mapwright</li>
+    <li>The generic pipeline seam — the one genuinely tricky bit</li>
+    <li>How the phased playbook keeps you safe</li>
+    <li>What "done" looks like</li>
+  </ol>
+</nav>
+
+<h2>1. The system we're upgrading</h2>
+<p class="lead">A layered ASP.NET Core REST API over a reference-data catalog, with a twist:
+its business logic is extensible through plugins.</p>
+<p>The solution has the classic clean-architecture layers — <strong>Domain</strong> (immutable
+records), <strong>Application</strong> (contracts and pipeline interfaces),
+<strong>Persistence</strong> (EF Core + SQL Server, repositories, and the AutoMapper
+configuration), <strong>Processing</strong> (a pipeline that runs incoming actions through
+filters, saves, then notifies subscribers), and a <strong>Service</strong> host (ASP.NET Core,
+Serilog with file/console/SQL/email sinks, Swagger).</p>
+<p>The twist is the <span class="term">module system</span>: <strong>filters</strong> (which can
+inspect/veto/modify records as they flow through) and <strong>subscribers</strong> (which get
+notified after changes) are <em>not</em> compiled into the application. They are separate class
+libraries, deployed as folders — <code>Modules/MyFilter/MyFilter.dll</code> — that the host
+discovers and loads <em>at runtime</em> with <code>Assembly.LoadFile</code>. A production
+installation can have <strong>hundreds</strong> of these module DLLs, built by different people
+over years.</p>
+<div class="callout">
+<strong>Why this matters for the upgrade:</strong> anything compiled into the solution gets
+checked by the compiler when we retarget it. The plugins don't — they are separate binaries that
+must <em>each</em> be retargeted, rebuilt, and redeployed, and the only thing standing between
+you and a runtime surprise is the process described in section 5.
+</div>
+
+<h2>2. Why upgrade — and why two separate parts</h2>
+<p>.NET 6 reached end of support in November 2024: no more security patches. .NET 10 is the
+current long-term-support release. This jump skips four major versions (6 → 7 → 8 → 9 → 10) in
+one hop — which sounds scary but mostly isn't, because Microsoft keeps runtime compatibility
+high; the pain concentrates in a handful of <em>packages</em> that changed their APIs across
+those years.</p>
+<p>The work splits cleanly in two, and the split is deliberate:</p>
+<div class="grid2">
+  <div class="card">
+    <div class="panel-title"><span class="pill p1">Part 1</span>&nbsp; .NET 6 → .NET 10</div>
+    <p style="font-size:.93rem"><strong>Not optional.</strong> Retarget every project, upgrade
+    packages, fix four known breakages, rebuild and redeploy every plugin module. AutoMapper
+    stays exactly as it is — one battle at a time. At the end: same behavior, supported platform.</p>
+  </div>
+  <div class="card">
+    <div class="panel-title"><span class="pill p2">Part 2</span>&nbsp; AutoMapper → Mapwright</div>
+    <p style="font-size:.93rem"><strong>Optional, and safe to defer.</strong> Replace the runtime
+    mapping engine with compile-time generated mappings. Plugins are completely unaffected —
+    mapping is internal to two projects. Do it after Part 1 is verified green, or don't do it at
+    all; the system runs fine either way.</p>
+  </div>
+</div>
+<div class="callout warn"><strong>Never mix the parts.</strong> If something breaks while both
+are in flight, you can't tell whether the framework jump or the mapping rewrite did it. Part 1
+ends with a tagged, verified, shippable state; Part 2 starts from that tag.</div>
+
+<h2>3. The key areas, at a glance</h2>
+<div class="overflow">
+<table>
+  <tr><th>#</th><th>Area</th><th>Part</th><th>Danger level</th><th>Why</th></tr>
+  <tr><td>1</td><td>Retarget all projects to <code>net10.0</code></td><td>1</td><td>Low</td><td>Mechanical; one script</td></tr>
+  <tr><td>2</td><td>Package version upgrades (EF Core, Serilog, Swashbuckle, Extensions)</td><td>1</td><td>Low–medium</td><td>A verified version matrix removes the guesswork</td></tr>
+  <tr><td>3</td><td>SQL connection strings (<code>Encrypt=true</code> default)</td><td>1</td><td><strong style="color:var(--bad)">HIGH</strong></td><td>Compiles clean, fails only at runtime</td></tr>
+  <tr><td>4</td><td>Serilog email sink rewrite</td><td>1</td><td>Medium</td><td>The old API was deleted upstream; wrapper must be rewritten</td></tr>
+  <tr><td>5</td><td>Swashbuckle/OpenAPI namespace move</td><td>1</td><td>Low</td><td>One using-directive per file</td></tr>
+  <tr><td>6</td><td>Plugin modules at scale (filters/subscribers, possibly hundreds)</td><td>1</td><td>Medium–high</td><td>Runtime loading = no compiler safety net; needs batch scripts + smoke tests</td></tr>
+  <tr><td>7</td><td>Transcribing the AutoMapper configuration into Mapwright declarations</td><td>2</td><td>Low</td><td>Mechanical transcription; the compiler verifies every line</td></tr>
+  <tr><td>8</td><td>Rewiring the generic repository/processor pipeline</td><td>2</td><td>Medium</td><td>The only structural change; solved with delegate injection</td></tr>
+</table>
+</div>
+
+<h2>4. Part 1, challenge by challenge</h2>
+
+<h3>4.1 The retarget itself — easier than it looks</h3>
+<p>Changing <code>&lt;TargetFramework&gt;net6.0&lt;/TargetFramework&gt;</code> to
+<code>net10.0</code> in every project file is one scripted find-and-replace. The C# language
+version rises with it, but newer C# is almost perfectly backward-compatible — old code keeps
+compiling. What the jump really changes is the <em>analysis</em>: the .NET 10 compiler is
+smarter about nullability and will surface a few new warnings in old code. The playbook
+identifies the two known spots and the pattern for fixing any others (fix at the warned site,
+change nothing structural).</p>
+
+<h3>4.2 Packages — where the years actually show</h3>
+<p>Four .NET versions of package evolution arrive at once. Most upgrades are pure version bumps.
+The verified matrix in the playbook pins every package to a version combination that is known to
+work <em>together</em> — that last word matters, because Serilog sinks, EF Core, and the
+Extensions packages each have their own compatibility webs, and "latest of everything" is how
+you discover incompatibilities one restore error at a time. Two upgrades change APIs, not just
+versions — 4.3 and 4.4 below. Two more rules protect you from unnecessary work: AutoMapper is
+deliberately <em>not</em> upgraded (it runs fine as-is, and Part 2 may delete it anyway), and
+NUnit stays on 3.x (NUnit 4 renamed the whole assertion API — a rewrite disguised as a version
+bump).</p>
+
+<h3>4.3 The connection-string trap — the most dangerous item in the whole migration</h3>
+<div class="callout danger">
+<strong>This one fails at runtime only.</strong> The upgraded SQL client defaults to
+<code>Encrypt=true</code>. Every connection string that doesn't explicitly say otherwise will
+<em>build perfectly</em> and then throw <code>SqlException: the certificate chain was issued by
+an authority that is not trusted</code> the first time it touches the database.
+</div>
+<p>Why: modern <code>Microsoft.Data.SqlClient</code> versions flipped the default — connections
+now demand encryption and validate the server's certificate. Most internal SQL Servers run
+self-signed certificates, so validation fails. The fix during migration is to append
+<code>TrustServerCertificate=True;</code> to every connection string, which keeps exactly the
+pre-upgrade behavior. The subtle part is <em>finding</em> every connection string: the app's own,
+but also the <strong>Serilog SQL sink's</strong> (which fails silently — logging just stops)
+and any <strong>hardcoded in test files</strong>. The playbook's discovery phase greps them all
+into a checklist precisely so none is forgotten.</p>
+<p><em>The honest footnote:</em> <code>TrustServerCertificate=True</code> means "encrypt but
+don't verify who I'm talking to." The right end-state is a properly trusted certificate on the
+SQL Server — that's an ops task to schedule after the migration, not a reason to block it.</p>
+
+<h3>4.4 The email sink — when a dependency deletes your API</h3>
+<p>The system wraps Serilog's email sink in two small helper classes so that alert emails can be
+configured from <code>appsettings.json</code>. Those helpers were built on
+<code>EmailConnectionInfo</code> — a type the sink's authors <strong>removed entirely</strong>
+in version 3.0 (the sink switched its internals from <code>System.Net.Mail</code> to MailKit).
+There is no "small fix": the wrapper must be rewritten against the new
+<code>EmailSinkOptions</code> API. The playbook supplies complete, drop-in replacement source
+for both files — including the subtle mapping of the old <code>EnableSsl</code> boolean onto the
+new connection-security enum (old <code>true</code> meant STARTTLS, not implicit TLS), and the
+rule that property names must not change because JSON configuration binds to them.</p>
+
+<h3>4.5 Swashbuckle — a one-line change you'd otherwise hunt for</h3>
+<p>Swagger generation (Swashbuckle 10) now depends on Microsoft.OpenApi 2.x, which moved
+<code>OpenApiInfo</code> out of the <code>Microsoft.OpenApi.Models</code> namespace. The compiler
+error looks alarming (<code>CS0234</code>) but the fix is deleting <code>.Models</code> from one
+using directive per affected file.</p>
+
+<h2>5. The plugin-module problem: hundreds of filters &amp; subscribers</h2>
+<p class="lead">This is the area where the real installation differs most from a toy example —
+and where scripting turns weeks into days.</p>
+
+<h3>5.1 Why plugins are different</h3>
+<p>Everything inside the solution is protected by the compiler: retarget it, and every
+incompatibility becomes a build error you can see. Plugin modules live <em>outside</em> that
+safety net. The host finds them at startup by scanning a <code>Modules/</code> directory and
+loading <code>&lt;Name&gt;/&lt;Name&gt;.dll</code> via <code>Assembly.LoadFile</code>, then looks
+inside each assembly for a class implementing the provider contract. Three consequences:</p>
+<ol>
+  <li><strong>No build-time check spans the boundary.</strong> A module compiled against the old
+  contracts will load — and may fail only when first <em>used</em>. The fix is procedural:
+  rebuild every module against the upgraded solution, never ship mixed builds.</li>
+  <li><strong>Type identity is fragile.</strong> The most notorious plugin failure is
+  <code>InvalidCastException: Unable to cast object of type 'X' to type 'X'</code> — the same
+  type name twice. It happens when a module's folder contains its <em>own stale copy</em> of a
+  host contract DLL: .NET then has two distinct assemblies with the same types, and a cast
+  between them fails. The rule that prevents it: <strong>module folders contain the module's own
+  DLL and its private dependencies — never the host's contract assemblies.</strong> The playbook
+  includes a one-liner that scans the whole deployed tree for violations.</li>
+  <li><strong>At hundreds of modules, manual anything is off the table.</strong></li>
+</ol>
+
+<h3>5.2 The batch pipeline</h3>
+<p>The playbook treats the module fleet as a data-processing problem:</p>
+<ol class="steps">
+  <li><strong>Discover.</strong> Enumerate module source projects (grep for references to the
+  Filter/Subscriber contract projects) and deployed module folders. Flag any deployed module
+  whose source can't be found — those are your long pole, and you want to know on day one.</li>
+  <li><strong>Batch retarget.</strong> One PowerShell loop rewrites the
+  <code>TargetFramework</code> in every module csproj. Idempotent — safe to rerun.</li>
+  <li><strong>Batch build with a failure report.</strong> A script builds every module and
+  writes a CSV: module name, pass/fail, first error. In a fleet of similar modules, failures
+  <em>cluster</em> — the same missing package or API change repeats across dozens. Fix one by
+  hand, script that fix across the fleet, rebuild, repeat until the failure column is empty.</li>
+  <li><strong>Batch verify before production.</strong> A smoke test loads every DLL in the
+  staging <code>Modules/</code> tree exactly the way the host would, and asserts each one yields
+  a provider type. Runtime loading problems get caught in CI, not in production logs.</li>
+  <li><strong>Roll out in waves.</strong> Host with zero modules first (proves the platform),
+  then one representative filter + one subscriber (proves the seam end-to-end), then the rest in
+  batches with the smoke test between waves.</li>
+</ol>
+<div class="callout"><strong>Modules with lost source</strong> deserve honesty: if you can't
+find a module's source, you can (in order of preference) dig for it in old CI artifacts, rewrite
+it (they're typically small — one provider + one filter/subscriber class), or <em>temporarily</em>
+test whether the old .NET 6 binary happens to work on the .NET 10 host in staging. That last
+option is recorded technical debt with a name and an owner, not a solution.</div>
+
+<h2>6. Part 2: replacing AutoMapper with Mapwright</h2>
+
+<h3>6.1 What AutoMapper does in this system today</h3>
+<p>The API keeps two parallel models per entity — an immutable domain record and a mutable EF
+Core entity — and converts between them constantly. One static <code>MapperFactory</code>
+(~200 lines) declares three AutoMapper maps per entity:</p>
+<ul>
+  <li><strong>domain → entity</strong>, with an <code>Ignore()</code> list for audit fields
+  (<code>User</code>, <code>Created</code>, <code>Modified</code>) and every navigation property;</li>
+  <li><strong>entity → domain</strong> (the plain direction);</li>
+  <li><strong>entity → entity</strong> (a "self-map"), used two ways by the update pipeline: to
+  <em>clone</em> a record before changing it (for the audit trail), and to <em>copy scalars
+  in place</em> onto the EF-tracked instance so Entity Framework sees the changes.</li>
+</ul>
+<p>A runtime test, <code>AssertConfigurationIsValid()</code>, is the only thing checking those
+maps stay in sync with the models. It runs when someone runs it.</p>
+
+<h3>6.2 Why replace it, and why Mapwright</h3>
+<p><a href="https://github.com/lodestar-labs/Mapwright">Mapwright</a> does the same job at
+<strong>compile time</strong>: you declare each mapping as a bodyless <code>static partial</code>
+method, and a Roslyn source generator writes the implementation as plain, debuggable C# during
+the build. The trade is decisively favorable in this codebase:</p>
+<div class="grid2">
+  <div class="card">
+    <div class="panel-title before">AutoMapper today</div>
+    <p style="font-size:.93rem">Rename a property → the convention match silently vanishes → a
+    column ships as <code>null</code>. Caught only if the validity test runs, only after the
+    fact. Mapping logic lives inside a reflection engine — no breakpoints, no diffs. ~200 config
+    lines to maintain.</p>
+  </div>
+  <div class="card">
+    <div class="panel-title after">Mapwright after</div>
+    <p style="font-size:.93rem">Rename a property → build warning <code>MW0001</code> within
+    seconds, promotable to an error. A stale ignore-list entry is a build <strong>error</strong>
+    (<code>MW0003</code>) — config can't rot. The generated mapper is a real C# file you can
+    read and step through. 3–5 declaration lines per entity.</p>
+  </div>
+</div>
+<p>The transcription itself is mechanical and — crucially for a system with many entities —
+<strong>batchable</strong>: every <code>ForMember(x, opt =&gt; opt.Ignore())</code> in the old
+factory becomes a <code>nameof(...)</code> in a <code>[MapIgnore(...)]</code> attribute. Do one
+entity end-to-end to calibrate, then sweep the rest and let the build's MW-diagnostic list be
+your to-do list. You never <em>invent</em> a mapping decision — you transcribe the decisions the
+old factory already recorded, and the compiler audits the transcription.</p>
+
+<h2>7. The generic pipeline seam — the one genuinely tricky bit</h2>
+<p>Here's the only place Part 2 requires actual design rather than transcription. The pipeline
+classes are generic — <code>Repository&lt;TDbModel&gt;</code>,
+<code>ActionProcessor&lt;TDataModel, TDbModel&gt;</code> — and they call AutoMapper through its
+runtime-generic interface: <code>_mapper.Map&lt;TDbModel&gt;(record)</code> works for <em>any</em>
+type because reflection resolves it at runtime. Mapwright's methods are per-pair statics
+(<code>CodeMapper.ToEntity(...)</code>) — a generic class can't name them.</p>
+<p>The bridge is <span class="term">delegate injection</span>, and it's simpler than it sounds:
+the generic class stops asking for "a mapper" and starts asking for exactly the functions it
+needs:</p>
+<pre><code><span class="cm">// Before: one magic object that can map anything (resolved at runtime)</span>
+<span class="kw">internal</span> Repository(..., <span class="ty">IMapper</span> mapper, ...)
+
+<span class="cm">// After: precisely the two operations Update() actually performs (resolved at compile time)</span>
+<span class="kw">internal</span> Repository(...,
+    <span class="ty">Func</span>&lt;TDbModel, TDbModel&gt; clone,
+    <span class="ty">Action</span>&lt;TDbModel, TDbModel&gt; copyScalars, ...)</code></pre>
+<p>Who supplies the delegates? The factory/DI registration — the one place that already knows
+the concrete types, because it constructs <code>Repository&lt;CodeEntity&gt;</code> per entity.
+There, a method group does the job: <code>new Repository&lt;CodeEntity&gt;(adapterFactory,
+CodeMapper.Clone, CodeMapper.CopyScalars, ...)</code>. One line edited per entity per seam —
+same batch rhythm as the mapper files, and the compiler lists every construction site that still
+has the old shape (<code>CS7036</code>) so nothing can be missed.</p>
+<div class="callout win"><strong>Why this design:</strong> no reflection, no new interfaces on
+your entities, nothing to register, trivially unit-testable (pass a lambda), Native-AOT-safe.
+It converts "the repository can map anything" — which was never true, it could map exactly what
+the factory configured — into "the repository maps exactly what it was given," which the
+compiler can check.</div>
+
+<h2>8. How the phased playbook keeps you safe</h2>
+<p>The companion markdown files are written to be executed step-by-step — by a careful junior
+developer or by an LLM. The safety model is worth understanding because it's what makes the
+"hundreds of modules / many entities" scale manageable:</p>
+<ul>
+  <li><strong>Discovery before action.</strong> Phase 01 builds work lists — every project,
+  every connection string, every entity, every module — from <em>your</em> copy of the code.
+  Nothing later assumes a count or a name, so a copy with 3× the modules follows the identical
+  process.</li>
+  <li><strong>GATEs.</strong> Every phase ends with objectively checkable conditions (a grep
+  that must come back empty, a build that must be green, a count that must match). You never
+  build on sand; a failing GATE stops the line.</li>
+  <li><strong>Commit per GATE.</strong> Any mistake rolls back one phase, not the whole effort.</li>
+  <li><strong>Runtime checks where the compiler can't see.</strong> The connection-string trap
+  and the plugin fleet both fail at runtime only — so the playbook ends each part with an
+  explicit smoke checklist (service starts, reads, writes, logs to SQL, emails, loads N
+  modules) rather than declaring victory at "build succeeded."</li>
+  <li><strong>A troubleshooting table</strong> maps every error message this migration is known
+  to produce to its cause and fix — including the <code>'X' to type 'X'</code> cast trap.</li>
+</ul>
+
+<h2>9. What "done" looks like</h2>
+<div class="overflow">
+<table>
+  <tr><th></th><th>After Part 1</th><th>After Part 2 (optional)</th></tr>
+  <tr><td>Platform</td><td>.NET 10 LTS, supported until 2028</td><td>same</td></tr>
+  <tr><td>Behavior</td><td>Identical to before (verified by tests + smoke)</td><td>Identical mapping semantics, now compiler-verified</td></tr>
+  <tr><td>Plugins</td><td>All rebuilt, redeployed, load-verified</td><td>Untouched by Part 2</td></tr>
+  <tr><td>Mapping</td><td>AutoMapper, unchanged</td><td>Mapwright: ~200 config lines → 3–5 lines/entity, drift = build error, generated code debuggable</td></tr>
+  <tr><td>Known debt recorded</td><td><code>TrustServerCertificate</code> bridge; any §4.5 legacy module DLLs</td><td>—</td></tr>
+</table>
+</div>
+
+<div class="callout">
+<strong>Where to go next:</strong> the executable playbook starts at
+<a href="part1/00-ground-rules.md">part1/00-ground-rules.md</a>; errors land in
+<a href="troubleshooting.md">troubleshooting.md</a>; Mapwright itself — including a beginner's
+guide to how source-generated mapping works and a production case study of exactly this kind of
+migration — lives at <a href="https://github.com/lodestar-labs/Mapwright">github.com/lodestar-labs/Mapwright</a>.
+</div>
+
+<div class="foot">
+Part of the public engineering guides collection · verified July 2026 against a production
+system of this architecture · entity and project names throughout are neutralized.
+</div>
+
+</div>
+</body>
+</html>

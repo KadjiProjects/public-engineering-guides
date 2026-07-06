@@ -1,7 +1,25 @@
 # KadjiProjects — public engineering guides
 
-Two independent, self-contained, fully generic resource sets. Nothing in this repository
+Three independent, self-contained, fully generic resource sets. Nothing in this repository
 references or depends on any private codebase.
+
+## 📁 [catalog-api-net10-upgrade/](catalog-api-net10-upgrade/)
+
+**A two-part, LLM-executable upgrade playbook for a plugin-based .NET 6 API.** Part 1
+migrates the platform to .NET 10: verified package matrix, the four known breakages
+(including the runtime-only SQL `Encrypt=true` trap), and batch strategies for upgrading
+hundreds of runtime-loaded filter/subscriber plugin modules. Part 2 optionally replaces
+AutoMapper with [Mapwright](https://github.com/lodestar-labs/Mapwright), the compile-time
+source-generated mapper — including the delegate-injection pattern for generic
+repository/processor pipelines.
+
+- `part1/` and `part2/` — phase files with hard GATEs, written for step-by-step execution
+  by a careful developer or a less-capable LLM; discovery-driven, so copies with more
+  entities or modules follow the identical process.
+- `challenges-explained.html` — the full story for humans, junior-developer friendly.
+- `troubleshooting.md` — every known error mapped to cause and fix.
+
+Start at [catalog-api-net10-upgrade/README.md](catalog-api-net10-upgrade/README.md).
 
 ## 📁 [explicit-mapping/](explicit-mapping/)
 
